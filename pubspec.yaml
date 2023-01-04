@@ -1,0 +1,26 @@
+name: material_table_view_demo
+description: A material_table_view_demo library demo
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.6 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  shimmer: ^2.0.0
+  material_table_view:
+    path: ./packages/material_table_view
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
