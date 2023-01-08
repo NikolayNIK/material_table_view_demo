@@ -14,7 +14,7 @@ dependencies:
 
   shimmer: ^2.0.0
   material_table_view:
-    path: ./packages/material_table_view
+    path: ../
 
 dev_dependencies:
   flutter_test:
