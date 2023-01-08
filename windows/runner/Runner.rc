@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.nikolaynik" "\0"
-            VALUE "FileDescription", "material_table_view_demo" "\0"
+            VALUE "FileDescription", "example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "material_table_view_demo" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2022 com.nikolaynik. All rights reserved." "\0"
-            VALUE "OriginalFilename", "material_table_view_demo.exe" "\0"
-            VALUE "ProductName", "material_table_view_demo" "\0"
+            VALUE "InternalName", "example" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 com.nikolaynik. All rights reserved." "\0"
+            VALUE "OriginalFilename", "example.exe" "\0"
+            VALUE "ProductName", "example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
