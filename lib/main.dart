@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text(_title)),
-      body: TableView(
+      body: TableView.builder(
         columns: [
           const TableColumn(
             width: 56.0,
@@ -99,73 +99,80 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
         rowCount: _rowCount - 1,
-        rowBuilder: (row) {
+        rowBuilder: (context, row, contentBuilder) {
           final selected = selection.contains(row);
           return (row + placeholderOffsetIndex) % 32 < 4
               ? null
-              : (context, column) => column == 0
-                  ? Checkbox(
-                      value: selection.contains(row),
-                      onChanged: (value) => setState(() => (value ?? false)
-                          ? selection.add(row)
-                          : selection.remove(row)))
-                  : Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(
-                          '${(row + 2) * column}',
-                          style: selected ? selectedTextStyle : textStyle,
-                          overflow: TextOverflow.fade,
-                          maxLines: 1,
-                          softWrap: false,
+              : _buildAnimatedSwitcher(
+                  rowIndex: row,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withAlpha(selected ? 0xFF : 0),
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: InkWell(
+                        onTap: () => setState(() {
+                          selection.clear();
+                          selection.add(row);
+                        }),
+                        child: contentBuilder(
+                          context,
+                          (context, column) => column == 0
+                              ? Checkbox(
+                                  value: selection.contains(row),
+                                  onChanged: (value) => setState(() =>
+                                      (value ?? false)
+                                          ? selection.add(row)
+                                          : selection.remove(row)))
+                              : Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      '${(row + 2) * column}',
+                                      style: selected
+                                          ? selectedTextStyle
+                                          : textStyle,
+                                      overflow: TextOverflow.fade,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
-                    );
-        },
-        rowDecorator: (rowWidget, rowIndex) => _buildAnimatedSwitcher(
-          rowIndex: rowIndex,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            color: Theme.of(context)
-                .colorScheme
-                .primaryContainer
-                .withAlpha(selection.contains(rowIndex) ? 0xFF : 0),
-            child: Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                onTap: () => setState(() {
-                  selection.clear();
-                  selection.add(rowIndex);
-                }),
-                child: rowWidget,
-              ),
-            ),
-          ),
-        ),
-        placeholderBuilder: (context, column) => column == 0
-            ? const Checkbox(value: false, onChanged: null)
-            : Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).dividerTheme.color!,
-                        shape: BoxShape.rectangle,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(16))),
-                    child: const SizedBox(
-                      height: 16.0,
-                      width: double.infinity,
                     ),
                   ),
-                ),
-              ),
-        placeholderDecorator: (placeholderWidget, rowIndex) =>
+                );
+        },
+        placeholderBuilder: (context, row, contentBuilder) =>
             _buildAnimatedSwitcher(
-          rowIndex: rowIndex,
-          child: placeholderWidget,
+          rowIndex: row,
+          child: contentBuilder(
+            context,
+            (context, column) => column == 0
+                ? const Checkbox(value: false, onChanged: null)
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).dividerTheme.color!,
+                            shape: BoxShape.rectangle,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16))),
+                        child: const SizedBox(
+                          height: 16.0,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
         ),
         placeholderContainerBuilder: (headerWidget) {
           final dividerColor = Theme.of(context).dividerTheme.color!;
@@ -182,28 +189,34 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: headerWidget);
         },
-        headerBuilder: (context, column) => column == 0
-            ? Checkbox(
-                value: selection.isEmpty ? false : null,
-                tristate: true,
-                onChanged: (value) {
-                  if (!(value ?? true)) {
-                    setState(() => selection.clear());
-                  }
-                },
-              )
-            : Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text("$column"),
+        headerBuilder: (context, contentBuilder) => contentBuilder(
+          context,
+          (context, column) => column == 0
+              ? Checkbox(
+                  value: selection.isEmpty ? false : null,
+                  tristate: true,
+                  onChanged: (value) {
+                    if (!(value ?? true)) {
+                      setState(() => selection.clear());
+                    }
+                  },
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("$column"),
+                  ),
                 ),
-              ),
-        footerBuilder: (context, column) => Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Align(
-            alignment: column == 0 ? Alignment.center : Alignment.centerLeft,
-            child: Text(column == 0 ? '${selection.length}' : '$column'),
+        ),
+        footerBuilder: (context, contentBuilder) => contentBuilder(
+          context,
+          (context, column) => Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Align(
+              alignment: column == 0 ? Alignment.center : Alignment.centerLeft,
+              child: Text(column == 0 ? '${selection.length}' : '$column'),
+            ),
           ),
         ),
       ),
