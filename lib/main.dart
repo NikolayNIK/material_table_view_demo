@@ -40,7 +40,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 const _columnsPowerOfTwo = 12;
-const _rowCount = (1 << 48) - 1; // 281_474_976_710_656 - 1
+const _rowCount = (1 << 31) - 1;
 
 class _MyHomePageState extends State<MyHomePage> {
   final selection = <int>{};
