@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:material_table_view/material_table_view.dart';
-import 'package:shimmer/shimmer.dart';
 
 void main() => runApp(const MyApp());
 
@@ -46,8 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final selection = <int>{};
   int placeholderOffsetIndex = 0;
 
-  final _rowKeys = <int, GlobalKey<_MyHomePageState>>{};
-
   late Timer periodicPlaceholderOffsetIncreaseTimer;
 
   @override
@@ -64,16 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     super.dispose();
   }
-
-  Widget _buildAnimatedSwitcher({
-    required Widget child,
-    required int rowIndex,
-  }) =>
-      AnimatedSwitcher(
-        key: _rowKeys.putIfAbsent(rowIndex, () => GlobalKey()),
-        duration: const Duration(milliseconds: 200),
-        child: RepaintBoundary(key: ValueKey(child.runtimeType), child: child),
-      );
 
   @override
   Widget build(BuildContext context) {
@@ -101,93 +88,44 @@ class _MyHomePageState extends State<MyHomePage> {
         rowCount: _rowCount - 1,
         rowBuilder: (context, row, contentBuilder) {
           final selected = selection.contains(row);
-          return (row + placeholderOffsetIndex) % 32 < 4
-              ? null
-              : _buildAnimatedSwitcher(
-                  rowIndex: row,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withAlpha(selected ? 0xFF : 0),
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: InkWell(
-                        onTap: () => setState(() {
-                          selection.clear();
-                          selection.add(row);
-                        }),
-                        child: contentBuilder(
-                          context,
-                          (context, column) => column == 0
-                              ? Checkbox(
-                                  value: selection.contains(row),
-                                  onChanged: (value) => setState(() =>
-                                      (value ?? false)
-                                          ? selection.add(row)
-                                          : selection.remove(row)))
-                              : Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(
-                                      '${(row + 2) * column}',
-                                      style: selected
-                                          ? selectedTextStyle
-                                          : textStyle,
-                                      overflow: TextOverflow.fade,
-                                      maxLines: 1,
-                                      softWrap: false,
-                                    ),
-                                  ),
-                                ),
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withAlpha(selected ? 0xFF : 0),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: () => setState(() {
+                  selection.clear();
+                  selection.add(row);
+                }),
+                child: contentBuilder(
+                  context,
+                  (context, column) => column == 0
+                      ? Checkbox(
+                          value: selection.contains(row),
+                          onChanged: (value) => setState(() => (value ?? false)
+                              ? selection.add(row)
+                              : selection.remove(row)))
+                      : Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              '${(row + 2) * column}',
+                              style: selected ? selectedTextStyle : textStyle,
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                );
-        },
-        placeholderBuilder: (context, row, contentBuilder) =>
-            _buildAnimatedSwitcher(
-          rowIndex: row,
-          child: contentBuilder(
-            context,
-            (context, column) => column == 0
-                ? const Checkbox(value: false, onChanged: null)
-                : Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).dividerTheme.color!,
-                            shape: BoxShape.rectangle,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(16))),
-                        child: const SizedBox(
-                          height: 16.0,
-                          width: double.infinity,
-                        ),
-                      ),
-                    ),
-                  ),
-          ),
-        ),
-        placeholderContainerBuilder: (headerWidget) {
-          final dividerColor = Theme.of(context).dividerTheme.color!;
-          return Shimmer(
-              period: const Duration(milliseconds: 1000),
-              gradient: LinearGradient(
-                begin: const FractionalOffset(.33, 0),
-                end: const FractionalOffset(.66, 0),
-                colors: [
-                  dividerColor.withOpacity(.2),
-                  dividerColor.withOpacity(1),
-                  dividerColor.withOpacity(0.2),
-                ],
+                ),
               ),
-              child: headerWidget);
+            ),
+          );
         },
         headerBuilder: (context, contentBuilder) => contentBuilder(
           context,
