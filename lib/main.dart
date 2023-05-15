@@ -107,19 +107,27 @@ class _MyHomePageState extends State<MyHomePage>
           shimmerBaseColor
         ],
         stops: const [.0, .45, .5, .95, 1],
-        builder: (context, placeholderShade) => TabBarView(
-          controller: tabController,
-          children: [
-            _buildBoxExample(
-              context,
-              placeholderShade,
-            ),
-            _buildSliverExample(
-              context,
-              placeholderShade,
-            ),
-          ],
-        ),
+        builder: (context, placeholderShade) =>
+            LayoutBuilder(builder: (context, constraints) {
+          // when the horizontal space is limited
+          // make the checkbox column sticky to conserve it
+          final makeFirstColumnSticky = constraints.maxWidth <= 512;
+          return TabBarView(
+            controller: tabController,
+            children: [
+              _buildBoxExample(
+                context,
+                placeholderShade,
+                makeFirstColumnSticky,
+              ),
+              _buildSliverExample(
+                context,
+                placeholderShade,
+                makeFirstColumnSticky,
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -136,6 +144,7 @@ class _MyHomePageState extends State<MyHomePage>
   Widget _buildBoxExample(
     BuildContext context,
     TablePlaceholderShade placeholderShade,
+    bool makeFirstColumnSticky,
   ) {
     final textStyle = Theme.of(context).textTheme.bodyMedium;
     final selectedTextStyle = textStyle?.copyWith(
@@ -143,9 +152,10 @@ class _MyHomePageState extends State<MyHomePage>
 
     return TableView.builder(
       columns: [
-        const TableColumn(
+        TableColumn(
           width: 56.0,
           freezePriority: 1 * (_columnsPowerOfTwo + 1),
+          sticky: makeFirstColumnSticky,
         ),
         for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
           TableColumn(
@@ -261,6 +271,7 @@ class _MyHomePageState extends State<MyHomePage>
   Widget _buildSliverExample(
     BuildContext context,
     TablePlaceholderShade placeholderShade,
+    bool makeFirstColumnSticky,
   ) {
     final textStyle = Theme.of(context).textTheme.bodyMedium;
     final selectedTextStyle = textStyle?.copyWith(
@@ -283,9 +294,10 @@ class _MyHomePageState extends State<MyHomePage>
           for (var i = 0; i < tableCount; i++) ...[
             SliverTableView.builder(
               columns: [
-                const TableColumn(
+                TableColumn(
                   width: 56.0,
                   freezePriority: 1 * (_columnsPowerOfTwo + 1),
+                  sticky: makeFirstColumnSticky,
                 ),
                 for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
                   TableColumn(
