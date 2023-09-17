@@ -27,10 +27,6 @@ class MyApp extends StatelessWidget {
           seedColor: Colors.blueGrey,
           brightness: brightness,
         ),
-        dividerColor: const Color(0x60808080),
-        dividerTheme: const DividerThemeData(
-          color: Color(0x60808080),
-        ),
       );
 }
 
