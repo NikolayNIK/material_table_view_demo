@@ -295,6 +295,13 @@ class _MyHomePageState extends State<MyHomePage>
         slivers: [
           for (var i = 0; i < tableCount; i++) ...[
             SliverTableView.builder(
+              style: const TableViewStyle(
+                // If we want the content to scroll out from underneath
+                // the vertical scrollbar
+                // we need to specify scroll padding here since we are
+                // managing that scrollbar.
+                scrollPadding: EdgeInsets.only(right: 10),
+              ),
               columns: [
                 TableColumn(
                   width: 56.0,
