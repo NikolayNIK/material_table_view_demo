@@ -156,6 +156,7 @@ class _MyHomePageState extends State<MyHomePage>
         for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
           TableColumn(
             width: 64,
+            flex: i, // this will make the column expand to fill remaining width
             freezePriority: 1 *
                 (_columnsPowerOfTwo -
                     (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
