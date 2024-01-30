@@ -244,10 +244,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget _headerBuilder(
     BuildContext context,
-    Widget Function(
-      BuildContext context,
-      Widget Function(BuildContext, int) cellBuilder,
-    ) contentBuilder,
+    TableRowContentBuilder contentBuilder,
   ) =>
       contentBuilder(
         context,
