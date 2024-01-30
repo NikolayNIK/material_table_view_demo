@@ -5,6 +5,7 @@ import 'package:material_table_view/default_animated_switcher_transition_builder
 import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:material_table_view/sliver_table_view.dart';
+import 'package:material_table_view/table_view_typedefs.dart';
 
 void main() => runApp(const MyApp());
 
@@ -141,133 +142,32 @@ class _MyHomePageState extends State<MyHomePage>
     BuildContext context,
     TablePlaceholderShade placeholderShade,
     bool makeFirstColumnSticky,
-  ) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
-    final selectedTextStyle = textStyle?.copyWith(
-        color: Theme.of(context).colorScheme.onPrimaryContainer);
-
-    return TableView.builder(
-      columns: [
-        TableColumn(
-          width: 56.0,
-          freezePriority: 1 * (_columnsPowerOfTwo + 1),
-          sticky: makeFirstColumnSticky,
-        ),
-        for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
+  ) =>
+      TableView.builder(
+        columns: [
           TableColumn(
-            width: 64,
-            flex: i, // this will make the column expand to fill remaining width
-            freezePriority: 1 *
-                (_columnsPowerOfTwo -
-                    (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
+            width: 56.0,
+            freezePriority: 1 * (_columnsPowerOfTwo + 1),
+            sticky: makeFirstColumnSticky,
           ),
-      ],
-      rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
-      rowCount: _rowCount - 1,
-      rowBuilder: (context, row, contentBuilder) {
-        final selected = selection.contains(row);
-        return (row + placeholderOffsetIndex) % 99 < 33
-            ? null
-            : _wrapRow(
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withAlpha(selected ? 0xFF : 0),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: InkWell(
-                      onTap: () => setState(() {
-                        selection.clear();
-                        selection.add(row);
-                      }),
-                      child: contentBuilder(
-                        context,
-                        (context, column) => column == 0
-                            ? Checkbox(
-                                value: selection.contains(row),
-                                onChanged: (value) => setState(() =>
-                                    (value ?? false)
-                                        ? selection.add(row)
-                                        : selection.remove(row)))
-                            : Align(
-                                alignment: Alignment.centerLeft,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    '${(row + 2) * column}',
-                                    style: selected
-                                        ? selectedTextStyle
-                                        : textStyle,
-                                    overflow: TextOverflow.fade,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                  ),
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-      },
-      placeholderBuilder: (context, contentBuilder) => _wrapRow(
-        contentBuilder(
-          context,
-          (context, column) => column == 0
-              ? const Checkbox(
-                  value: false,
-                  onChanged: _dummyCheckboxOnChanged,
-                )
-              : const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(16)))),
-                ),
-        ),
-      ),
-      placeholderShade: placeholderShade,
-      headerBuilder: (context, contentBuilder) => contentBuilder(
-        context,
-        (context, column) => column == 0
-            ? Checkbox(
-                value: selection.isEmpty ? false : null,
-                tristate: true,
-                onChanged: (value) {
-                  if (!(value ?? true)) {
-                    setState(() => selection.clear());
-                  }
-                },
-              )
-            : Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  onTap: () {},
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("$column"),
-                    ),
-                  ),
-                ),
-              ),
-      ),
-      footerBuilder: (context, contentBuilder) => contentBuilder(
-        context,
-        (context, column) => Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Align(
-            alignment: column == 0 ? Alignment.center : Alignment.centerLeft,
-            child: Text(column == 0 ? '${selection.length}' : '$column'),
-          ),
-        ),
-      ),
-    );
-  }
+          for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
+            TableColumn(
+              width: 64,
+              flex: i,
+              // this will make the column expand to fill remaining width
+              freezePriority: 1 *
+                  (_columnsPowerOfTwo -
+                      (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
+            ),
+        ],
+        rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
+        rowCount: _rowCount - 1,
+        rowBuilder: _rowBuilder,
+        placeholderBuilder: _placeholderBuilder,
+        placeholderShade: placeholderShade,
+        headerBuilder: _headerBuilder,
+        footerBuilder: _footerBuilder,
+      );
 
   /// Builds multiple [SliverTableView]s alongside [SliverFixedExtentList]s
   /// in a single vertical [CustomScrollView].
@@ -276,10 +176,6 @@ class _MyHomePageState extends State<MyHomePage>
     TablePlaceholderShade placeholderShade,
     bool makeFirstColumnSticky,
   ) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium;
-    final selectedTextStyle = textStyle?.copyWith(
-        color: Theme.of(context).colorScheme.onPrimaryContainer);
-
     /// the count is on the low side to make reaching table boundaries easier
     const rowsPerTable = 90;
     const tableCount = 32;
@@ -319,115 +215,11 @@ class _MyHomePageState extends State<MyHomePage>
               ],
               rowHeight: itemExtent,
               rowCount: rowsPerTable,
-              rowBuilder: (context, row, contentBuilder) {
-                row += rowsPerTable * i;
-
-                final selected = selection.contains(row);
-                return (row + placeholderOffsetIndex) % 99 < 33
-                    ? null
-                    : _wrapRow(
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
-                              .withAlpha(selected ? 0xFF : 0),
-                          child: Material(
-                            type: MaterialType.transparency,
-                            child: InkWell(
-                              onTap: () => setState(() {
-                                selection.clear();
-                                selection.add(row);
-                              }),
-                              child: contentBuilder(
-                                context,
-                                (context, column) => column == 0
-                                    ? Checkbox(
-                                        value: selection.contains(row),
-                                        onChanged: (value) => setState(() =>
-                                            (value ?? false)
-                                                ? selection.add(row)
-                                                : selection.remove(row)))
-                                    : Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: Text(
-                                            '${(row + 2) * column}',
-                                            style: selected
-                                                ? selectedTextStyle
-                                                : textStyle,
-                                            overflow: TextOverflow.fade,
-                                            maxLines: 1,
-                                            softWrap: false,
-                                          ),
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-              },
-              placeholderBuilder: (context, contentBuilder) => _wrapRow(
-                contentBuilder(
-                  context,
-                  (context, column) => column == 0
-                      ? const Checkbox(
-                          value: false,
-                          onChanged: _dummyCheckboxOnChanged,
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(16)))),
-                        ),
-                ),
-              ),
+              rowBuilder: _rowBuilder,
+              placeholderBuilder: _placeholderBuilder,
               placeholderShade: placeholderShade,
-              headerBuilder: (context, contentBuilder) => contentBuilder(
-                context,
-                (context, column) => column == 0
-                    ? Checkbox(
-                        value: selection.isEmpty ? false : null,
-                        tristate: true,
-                        onChanged: (value) {
-                          if (!(value ?? true)) {
-                            setState(() => selection.clear());
-                          }
-                        },
-                      )
-                    : Material(
-                        type: MaterialType.transparency,
-                        child: InkWell(
-                          onTap: () {},
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text("$column"),
-                            ),
-                          ),
-                        ),
-                      ),
-              ),
-              footerBuilder: (context, contentBuilder) => contentBuilder(
-                context,
-                (context, column) => Padding(
-                  padding: column == 0
-                      ? const EdgeInsets.only(left: 18.0)
-                      : const EdgeInsets.only(left: 8.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child:
-                        Text(column == 0 ? '${selection.length}' : '$column'),
-                  ),
-                ),
-              ),
+              headerBuilder: _headerBuilder,
+              footerBuilder: _footerBuilder,
             ),
             SliverFixedExtentList(
               delegate: SliverChildBuilderDelegate(
@@ -449,6 +241,135 @@ class _MyHomePageState extends State<MyHomePage>
       ),
     );
   }
+
+  Widget _headerBuilder(
+    BuildContext context,
+    Widget Function(
+      BuildContext context,
+      Widget Function(BuildContext, int) cellBuilder,
+    ) contentBuilder,
+  ) =>
+      contentBuilder(
+        context,
+        (context, column) => column == 0
+            ? Checkbox(
+                value: selection.isEmpty ? false : null,
+                tristate: true,
+                onChanged: (value) {
+                  if (!(value ?? true)) {
+                    setState(() => selection.clear());
+                  }
+                },
+              )
+            : Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: () {},
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("$column"),
+                    ),
+                  ),
+                ),
+              ),
+      );
+
+  Widget? _rowBuilder(
+    BuildContext context,
+    int row,
+    TableRowContentBuilder contentBuilder,
+  ) {
+    final selected = selection.contains(row);
+
+    var textStyle = Theme.of(context).textTheme.bodyMedium;
+    if (selected) {
+      textStyle = textStyle?.copyWith(
+          color: Theme.of(context).colorScheme.onPrimaryContainer);
+    }
+
+    return (row + placeholderOffsetIndex) % 99 < 33
+        ? null
+        : _wrapRow(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              color: Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withAlpha(selected ? 0xFF : 0),
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: () => setState(() {
+                    selection.clear();
+                    selection.add(row);
+                  }),
+                  child: contentBuilder(
+                    context,
+                    (context, column) => column == 0
+                        ? Checkbox(
+                            value: selection.contains(row),
+                            onChanged: (value) => setState(() =>
+                                (value ?? false)
+                                    ? selection.add(row)
+                                    : selection.remove(row)))
+                        : Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                '${(row + 2) * column}',
+                                style: textStyle,
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                                softWrap: false,
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          );
+  }
+
+  Widget _placeholderBuilder(
+    BuildContext context,
+    TableRowContentBuilder contentBuilder,
+  ) =>
+      _wrapRow(
+        contentBuilder(
+          context,
+          (context, column) => column == 0
+              ? const Checkbox(
+                  value: false,
+                  onChanged: _dummyCheckboxOnChanged,
+                )
+              : const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: DecoratedBox(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(16)))),
+                ),
+        ),
+      );
+
+  Widget _footerBuilder(
+    BuildContext context,
+    TableRowContentBuilder contentBuilder,
+  ) =>
+      contentBuilder(
+        context,
+        (context, column) => Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Align(
+            alignment: column == 0 ? Alignment.center : Alignment.centerLeft,
+            child: Text(column == 0 ? '${selection.length}' : '$column'),
+          ),
+        ),
+      );
 
   /// This is used to create const [Checkbox]es that are enabled.
   static void _dummyCheckboxOnChanged(bool? _) {}
