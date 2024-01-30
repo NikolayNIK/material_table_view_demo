@@ -5,6 +5,7 @@ import 'package:material_table_view/default_animated_switcher_transition_builder
 import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:material_table_view/sliver_table_view.dart';
+import 'package:material_table_view/table_column_controls.dart';
 import 'package:material_table_view/table_view_typedefs.dart';
 
 void main() => runApp(const MyApp());
@@ -41,6 +42,43 @@ class MyHomePage extends StatefulWidget {
 const _columnsPowerOfTwo = 12;
 const _rowCount = (1 << 31) - 1;
 
+/// Extends [TableColumn] to keep track of its original index regardless of where it happened to move to.
+class _MyTableColumn extends TableColumn {
+  _MyTableColumn({
+    required int index,
+    required super.width,
+    super.freezePriority = 0,
+    super.sticky = false,
+    super.flex = 0,
+    super.translation = 0,
+  })  : key = ValueKey<int>(index),
+        // ignore: prefer_initializing_formals
+        index = index;
+
+  final int index;
+
+  @override
+  final ValueKey<int> key;
+
+  /// This is a vital override because [TableColumnControls] uses this method to copy the column.
+  /// Because of this we can expect [TableColumnControls] to give us an instance of this method.
+  @override
+  _MyTableColumn copyWith(
+          {double? width,
+          int? freezePriority,
+          bool? sticky,
+          int? flex,
+          double? translation}) =>
+      _MyTableColumn(
+        index: index,
+        width: width ?? this.width,
+        freezePriority: freezePriority ?? this.freezePriority,
+        sticky: sticky ?? this.sticky,
+        flex: flex ?? this.flex,
+        translation: translation ?? this.translation,
+      );
+}
+
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin<MyHomePage> {
   late TabController tabController;
@@ -49,7 +87,26 @@ class _MyHomePageState extends State<MyHomePage>
   int placeholderOffsetIndex = 0;
   late Timer periodicPlaceholderOffsetIncreaseTimer;
 
+  final tableController = TableViewController();
   final verticalSliverExampleScrollController = ScrollController();
+
+  final columns = <_MyTableColumn>[
+    _MyTableColumn(
+      index: 0,
+      width: 56.0,
+      freezePriority: 1 * (_columnsPowerOfTwo + 1),
+      sticky: true,
+    ),
+    for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
+      _MyTableColumn(
+        index: i,
+        width: 64,
+        // translation: i,
+        flex: i, // this will make the column expand to fill remaining width
+        freezePriority: 1 *
+            (_columnsPowerOfTwo - (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
+      ),
+  ];
 
   @override
   void initState() {
@@ -129,36 +186,47 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
+  /// Wraps a [child] in the [TableColumnControls] widget using the [horizontalScrollController] passed to it because
+  /// box and sliver examples have to use different ones.
+  Widget _buildTableColumnControls({
+    required ScrollController horizontalScrollController,
+    required Widget child,
+  }) =>
+      TableColumnControls(
+        columns: columns,
+        scrollController: horizontalScrollController,
+        // We can freely cast the columns here thanks to the override of [_MyTableColumn.copyWith]
+
+        // Note that both the [TableColumnControls] and the [TableView]/[SliverTableView] must be rebuilt when columns
+        // change
+        onColumnTranslate: (index, newColumn) =>
+            setState(() => columns[index] = newColumn as _MyTableColumn),
+        onColumnResize: (index, newColumn) =>
+            setState(() => columns[index] = newColumn as _MyTableColumn),
+        onColumnMove: (oldIndex, newIndex) => setState(
+            () => columns.insert(newIndex, columns.removeAt(oldIndex))),
+        child: child,
+      );
+
   /// Builds a regular [TableView].
   Widget _buildBoxExample(
     BuildContext context,
     TablePlaceholderShade placeholderShade,
     bool makeFirstColumnSticky,
   ) =>
-      TableView.builder(
-        columns: [
-          TableColumn(
-            width: 56.0,
-            freezePriority: 1 * (_columnsPowerOfTwo + 1),
-            sticky: makeFirstColumnSticky,
-          ),
-          for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
-            TableColumn(
-              width: 64,
-              flex: i,
-              // this will make the column expand to fill remaining width
-              freezePriority: 1 *
-                  (_columnsPowerOfTwo -
-                      (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
-            ),
-        ],
-        rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
-        rowCount: _rowCount - 1,
-        rowBuilder: _rowBuilder,
-        placeholderBuilder: _placeholderBuilder,
-        placeholderShade: placeholderShade,
-        headerBuilder: _headerBuilder,
-        footerBuilder: _footerBuilder,
+      _buildTableColumnControls(
+        horizontalScrollController: tableController.horizontalScrollController,
+        child: TableView.builder(
+          controller: tableController,
+          columns: columns,
+          rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
+          rowCount: _rowCount - 1,
+          rowBuilder: _rowBuilder,
+          placeholderBuilder: _placeholderBuilder,
+          placeholderShade: placeholderShade,
+          headerBuilder: _headerBuilder,
+          footerBuilder: _footerBuilder,
+        ),
       );
 
   /// Builds multiple [SliverTableView]s alongside [SliverFixedExtentList]s
@@ -191,20 +259,7 @@ class _MyHomePageState extends State<MyHomePage>
                 // managing that scrollbar.
                 scrollPadding: EdgeInsets.only(right: 10),
               ),
-              columns: [
-                TableColumn(
-                  width: 56.0,
-                  freezePriority: 1 * (_columnsPowerOfTwo + 1),
-                  sticky: makeFirstColumnSticky,
-                ),
-                for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
-                  TableColumn(
-                    width: 64,
-                    freezePriority: 1 *
-                        (_columnsPowerOfTwo -
-                            (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
-                  ),
-              ],
+              columns: columns,
               rowHeight: itemExtent,
               rowCount: rowsPerTable,
               rowBuilder: _rowBuilder,
@@ -253,12 +308,12 @@ class _MyHomePageState extends State<MyHomePage>
             : Material(
                 type: MaterialType.transparency,
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () => TableColumnControls.of(context).invoke(column),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("$column"),
+                      child: Text("${columns[column].index}"),
                     ),
                   ),
                 ),
@@ -316,7 +371,7 @@ class _MyHomePageState extends State<MyHomePage>
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: Text(
-                                '${(row + 2) * column}',
+                                '${(row + 2) * columns[column].index}',
                                 style: textStyle,
                                 overflow: TextOverflow.fade,
                                 maxLines: 1,
@@ -363,7 +418,9 @@ class _MyHomePageState extends State<MyHomePage>
           padding: const EdgeInsets.only(left: 8.0),
           child: Align(
             alignment: column == 0 ? Alignment.center : Alignment.centerLeft,
-            child: Text(column == 0 ? '${selection.length}' : '$column'),
+            child: Text(column == 0
+                ? '${selection.length}'
+                : '${columns[column].index}'),
           ),
         ),
       );
