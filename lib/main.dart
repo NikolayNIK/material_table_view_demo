@@ -129,14 +129,6 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  /// This is used to wrap both regular and placeholder rows to achieve fade
-  /// transition between them.
-  Widget _wrapRow(Widget child) => AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        transitionBuilder: tableRowDefaultAnimatedSwitcherTransitionBuilder,
-        child: child,
-      );
-
   /// Builds a regular [TableView].
   Widget _buildBoxExample(
     BuildContext context,
@@ -271,6 +263,14 @@ class _MyHomePageState extends State<MyHomePage>
                   ),
                 ),
               ),
+      );
+
+  /// This is used to wrap both regular and placeholder rows to achieve fade
+  /// transition between them.
+  Widget _wrapRow(Widget child) => AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        transitionBuilder: tableRowDefaultAnimatedSwitcherTransitionBuilder,
+        child: child,
       );
 
   Widget? _rowBuilder(
