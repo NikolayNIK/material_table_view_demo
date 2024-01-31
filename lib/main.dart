@@ -87,7 +87,6 @@ class _MyHomePageState extends State<MyHomePage>
   int placeholderOffsetIndex = 0;
   late Timer periodicPlaceholderOffsetIncreaseTimer;
 
-  final tableController = TableViewController();
   final verticalSliverExampleScrollController = ScrollController();
 
   final columns = <_MyTableColumn>[
@@ -207,7 +206,6 @@ class _MyHomePageState extends State<MyHomePage>
     bool makeFirstColumnSticky,
   ) =>
       TableView.builder(
-        controller: tableController,
         columns: columns,
         rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
         rowCount: _rowCount - 1,
