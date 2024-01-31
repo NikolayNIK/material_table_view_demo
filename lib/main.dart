@@ -132,81 +132,73 @@ class _MyHomePageState extends State<MyHomePage>
     const shimmerBaseColor = Color(0x20808080);
     const shimmerHighlightColor = Color(0x40FFFFFF);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(_title),
-        bottom: TabBar(
-          controller: tabController,
-          tabs: const [
-            Tooltip(
-              message:
-                  'Standalone box TableView with its own vertically scrollable space between the header and the footer',
-              child: Tab(text: 'Regular box'),
-            ),
-            Tooltip(
-              message:
-                  'Multiple SliverTableViews alongside other slivers scrolled vertically by its parent',
-              child: Tab(text: 'Slivers'),
-            ),
-          ],
-        ),
-      ),
-      body: ShimmerPlaceholderShadeProvider(
-        loopDuration: const Duration(seconds: 2),
-        colors: const [
-          shimmerBaseColor,
-          shimmerHighlightColor,
-          shimmerBaseColor,
-          shimmerHighlightColor,
-          shimmerBaseColor
-        ],
-        stops: const [.0, .45, .5, .95, 1],
-        builder: (context, placeholderShade) =>
-            LayoutBuilder(builder: (context, constraints) {
-          // when the horizontal space is limited
-          // make the checkbox column sticky to conserve it
-          final makeFirstColumnSticky = constraints.maxWidth <= 512;
-          return TabBarView(
+    return TableColumnControls(
+      columns: columns,
+      // We can freely cast the columns here thanks to the override of [_MyTableColumn.copyWith]
+
+      // Note that both the [TableColumnControls] and the [TableView]/[SliverTableView] must be rebuilt when columns
+      // change
+      onColumnTranslate: (index, newColumn) =>
+          setState(() => columns[index] = newColumn as _MyTableColumn),
+      onColumnResize: (index, newColumn) =>
+          setState(() => columns[index] = newColumn as _MyTableColumn),
+      onColumnMove: (oldIndex, newIndex) =>
+          setState(() => columns.insert(newIndex, columns.removeAt(oldIndex))),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(_title),
+          bottom: TabBar(
             controller: tabController,
-            children: [
-              _buildBoxExample(
-                context,
-                placeholderShade,
-                makeFirstColumnSticky,
+            tabs: const [
+              Tooltip(
+                message:
+                    'Standalone box TableView with its own vertically scrollable space between the header and the footer',
+                child: Tab(text: 'Regular box'),
               ),
-              _buildSliverExample(
-                context,
-                placeholderShade,
-                makeFirstColumnSticky,
+              Tooltip(
+                message:
+                    'Multiple SliverTableViews alongside other slivers scrolled vertically by its parent',
+                child: Tab(text: 'Slivers'),
               ),
             ],
-          );
-        }),
+          ),
+        ),
+        body: ShimmerPlaceholderShadeProvider(
+          loopDuration: const Duration(seconds: 2),
+          colors: const [
+            shimmerBaseColor,
+            shimmerHighlightColor,
+            shimmerBaseColor,
+            shimmerHighlightColor,
+            shimmerBaseColor
+          ],
+          stops: const [.0, .45, .5, .95, 1],
+          builder: (context, placeholderShade) => LayoutBuilder(
+            builder: (context, constraints) {
+              // when the horizontal space is limited
+              // make the checkbox column sticky to conserve it
+              final makeFirstColumnSticky = constraints.maxWidth <= 512;
+              return TabBarView(
+                controller: tabController,
+                children: [
+                  _buildBoxExample(
+                    context,
+                    placeholderShade,
+                    makeFirstColumnSticky,
+                  ),
+                  _buildSliverExample(
+                    context,
+                    placeholderShade,
+                    makeFirstColumnSticky,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
-
-  /// Wraps a [child] in the [TableColumnControls] widget using the [horizontalScrollController] passed to it because
-  /// box and sliver examples have to use different ones.
-  Widget _buildTableColumnControls({
-    required ScrollController horizontalScrollController,
-    required Widget child,
-  }) =>
-      TableColumnControls(
-        columns: columns,
-        scrollController: horizontalScrollController,
-        // We can freely cast the columns here thanks to the override of [_MyTableColumn.copyWith]
-
-        // Note that both the [TableColumnControls] and the [TableView]/[SliverTableView] must be rebuilt when columns
-        // change
-        onColumnTranslate: (index, newColumn) =>
-            setState(() => columns[index] = newColumn as _MyTableColumn),
-        onColumnResize: (index, newColumn) =>
-            setState(() => columns[index] = newColumn as _MyTableColumn),
-        onColumnMove: (oldIndex, newIndex) => setState(
-            () => columns.insert(newIndex, columns.removeAt(oldIndex))),
-        child: child,
-      );
 
   /// Builds a regular [TableView].
   Widget _buildBoxExample(
@@ -214,19 +206,16 @@ class _MyHomePageState extends State<MyHomePage>
     TablePlaceholderShade placeholderShade,
     bool makeFirstColumnSticky,
   ) =>
-      _buildTableColumnControls(
-        horizontalScrollController: tableController.horizontalScrollController,
-        child: TableView.builder(
-          controller: tableController,
-          columns: columns,
-          rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
-          rowCount: _rowCount - 1,
-          rowBuilder: _rowBuilder,
-          placeholderBuilder: _placeholderBuilder,
-          placeholderShade: placeholderShade,
-          headerBuilder: _headerBuilder,
-          footerBuilder: _footerBuilder,
-        ),
+      TableView.builder(
+        controller: tableController,
+        columns: columns,
+        rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
+        rowCount: _rowCount - 1,
+        rowBuilder: _rowBuilder,
+        placeholderBuilder: _placeholderBuilder,
+        placeholderShade: placeholderShade,
+        headerBuilder: _headerBuilder,
+        footerBuilder: _footerBuilder,
       );
 
   /// Builds multiple [SliverTableView]s alongside [SliverFixedExtentList]s
