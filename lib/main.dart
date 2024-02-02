@@ -176,19 +176,17 @@ class _MyHomePageState extends State<MyHomePage>
             builder: (context, constraints) {
               // when the horizontal space is limited
               // make the checkbox column sticky to conserve it
-              final makeFirstColumnSticky = constraints.maxWidth <= 512;
+              columns[0] = columns[0].copyWith(sticky: constraints.maxWidth <= 512);
               return TabBarView(
                 controller: tabController,
                 children: [
                   _buildBoxExample(
                     context,
                     placeholderShade,
-                    makeFirstColumnSticky,
                   ),
                   _buildSliverExample(
                     context,
                     placeholderShade,
-                    makeFirstColumnSticky,
                   ),
                 ],
               );
@@ -203,7 +201,6 @@ class _MyHomePageState extends State<MyHomePage>
   Widget _buildBoxExample(
     BuildContext context,
     TablePlaceholderShade placeholderShade,
-    bool makeFirstColumnSticky,
   ) =>
       TableView.builder(
         columns: columns,
@@ -221,7 +218,6 @@ class _MyHomePageState extends State<MyHomePage>
   Widget _buildSliverExample(
     BuildContext context,
     TablePlaceholderShade placeholderShade,
-    bool makeFirstColumnSticky,
   ) {
     /// the count is on the low side to make reaching table boundaries easier
     const rowsPerTable = 90;
