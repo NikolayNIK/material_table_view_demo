@@ -175,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage>
           builder: (context, placeholderShade) => LayoutBuilder(
             builder: (context, constraints) {
               // when the horizontal space is limited
-              // make the checkbox column sticky to conserve it
+              // make the checkbox column sticky to conserve it (the space not the column)
               columns[0] = columns[0].copyWith(sticky: constraints.maxWidth <= 512);
               return TabBarView(
                 controller: tabController,
