@@ -137,12 +137,16 @@ class _MyHomePageState extends State<MyHomePage>
 
       // Note that both the [TableColumnControls] and the [TableView]/[SliverTableView] must be rebuilt when columns
       // change
-      onColumnTranslate: (tableWidgetKey, index, newColumn) =>
-          setState(() => columns[index] = newColumn as _MyTableColumn),
-      onColumnResize: (tableWidgetKey, index, newColumn) =>
-          setState(() => columns[index] = newColumn as _MyTableColumn),
-      onColumnMove: (tableWidgetKey, oldIndex, newIndex) =>
-          setState(() => columns.insert(newIndex, columns.removeAt(oldIndex))),
+      onColumnTranslate: (tableWidgetKey, index, newTranslation) => setState(
+        () => columns[index] =
+            columns[index].copyWith(translation: newTranslation),
+      ),
+      onColumnResize: (tableWidgetKey, index, newWidth) => setState(
+        () => columns[index] = columns[index].copyWith(width: newWidth),
+      ),
+      onColumnMove: (tableWidgetKey, oldIndex, newIndex) => setState(
+        () => columns.insert(newIndex, columns.removeAt(oldIndex)),
+      ),
       child: Scaffold(
         appBar: AppBar(
           title: const Text(_title),
