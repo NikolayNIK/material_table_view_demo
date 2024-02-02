@@ -132,16 +132,16 @@ class _MyHomePageState extends State<MyHomePage>
     const shimmerHighlightColor = Color(0x40FFFFFF);
 
     return TableColumnControls(
-      columns: columns,
+      columns: (tableWidgetKey) => columns,
       // We can freely cast the columns here thanks to the override of [_MyTableColumn.copyWith]
 
       // Note that both the [TableColumnControls] and the [TableView]/[SliverTableView] must be rebuilt when columns
       // change
-      onColumnTranslate: (index, newColumn) =>
+      onColumnTranslate: (tableWidgetKey, index, newColumn) =>
           setState(() => columns[index] = newColumn as _MyTableColumn),
-      onColumnResize: (index, newColumn) =>
+      onColumnResize: (tableWidgetKey, index, newColumn) =>
           setState(() => columns[index] = newColumn as _MyTableColumn),
-      onColumnMove: (oldIndex, newIndex) =>
+      onColumnMove: (tableWidgetKey, oldIndex, newIndex) =>
           setState(() => columns.insert(newIndex, columns.removeAt(oldIndex))),
       child: Scaffold(
         appBar: AppBar(
@@ -176,7 +176,8 @@ class _MyHomePageState extends State<MyHomePage>
             builder: (context, constraints) {
               // when the horizontal space is limited
               // make the checkbox column sticky to conserve it (the space not the column)
-              columns[0] = columns[0].copyWith(sticky: constraints.maxWidth <= 512);
+              columns[0] =
+                  columns[0].copyWith(sticky: constraints.maxWidth <= 512);
               return TabBarView(
                 controller: tabController,
                 children: [
