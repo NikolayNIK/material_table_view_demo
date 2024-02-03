@@ -132,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage>
     const shimmerBaseColor = Color(0x20808080);
     const shimmerHighlightColor = Color(0x40FFFFFF);
 
-    return TableColumnControls(
+    return TableColumnControls.realtime(
       columns: (tableWidgetKey) => columns,
       // We can freely cast the columns here thanks to the override of [_MyTableColumn.copyWith]
 
