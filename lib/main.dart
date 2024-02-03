@@ -164,6 +164,7 @@ class _MyHomePageState extends State<MyHomePage>
               ),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Expanded(
                   child: Padding(
@@ -176,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage>
                 InkWell(
                   onTap: () => Navigator.of(context).pop(),
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: Text(
                       'Button to cancel the controls',
                       textAlign: TextAlign.center,
