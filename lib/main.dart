@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:material_table_view/default_animated_switcher_transition_builder.dart';
@@ -146,6 +147,49 @@ class _MyHomePageState extends State<MyHomePage>
       ),
       onColumnMove: (tableWidgetKey, oldIndex, newIndex) => setState(
         () => columns.insert(newIndex, columns.removeAt(oldIndex)),
+      ),
+      popupBuilder: (context, tableWidgetKey, animation, secondaryAnimation,
+              columnWidth) =>
+          PreferredSize(
+        preferredSize: Size(min(256, max(192, columnWidth)), 256),
+        child: FadeTransition(
+          opacity: animation,
+          child: Material(
+            type: MaterialType.card,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              side: Divider.createBorderSide(context),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(16.0),
+              ),
+            ),
+            child: Column(
+              children: [
+                const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      'Custom widget to control sorting, stickiness and whatever',
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Button to cancel the controls',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       child: Scaffold(
         appBar: AppBar(
