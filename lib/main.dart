@@ -328,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage>
   ) =>
       contentBuilder(
         context,
-        (context, column) => column == 0
+        (context, column) => columns[column].index == 0
             ? Checkbox(
                 value: selection.isEmpty ? false : null,
                 tristate: true,
@@ -392,7 +392,7 @@ class _MyHomePageState extends State<MyHomePage>
                   }),
                   child: contentBuilder(
                     context,
-                    (context, column) => column == 0
+                    (context, column) => columns[column].index == 0
                         ? Checkbox(
                             value: selection.contains(row),
                             onChanged: (value) => setState(() =>
@@ -426,7 +426,7 @@ class _MyHomePageState extends State<MyHomePage>
       _wrapRow(
         contentBuilder(
           context,
-          (context, column) => column == 0
+          (context, column) => columns[column].index == 0
               ? const Checkbox(
                   value: false,
                   onChanged: _dummyCheckboxOnChanged,
@@ -450,7 +450,9 @@ class _MyHomePageState extends State<MyHomePage>
         (context, column) => Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Align(
-            alignment: column == 0 ? Alignment.center : Alignment.centerLeft,
+            alignment: columns[column].index == 0
+                ? Alignment.center
+                : Alignment.centerLeft,
             child: Text(column == 0
                 ? '${selection.length}'
                 : '${columns[column].index}'),
