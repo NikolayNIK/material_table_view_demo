@@ -148,6 +148,7 @@ class _MyHomePageState extends State<MyHomePage>
       onColumnMove: (tableWidgetKey, oldIndex, newIndex) => setState(
         () => columns.insert(newIndex, columns.removeAt(oldIndex)),
       ),
+      leadingImmovableColumnCount: (tableWidgetKey) => 1,
       popupBuilder: (context, tableWidgetKey, animation, secondaryAnimation,
               columnWidth) =>
           PreferredSize(
