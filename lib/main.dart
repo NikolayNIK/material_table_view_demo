@@ -132,117 +132,55 @@ class _MyHomePageState extends State<MyHomePage>
     const shimmerBaseColor = Color(0x20808080);
     const shimmerHighlightColor = Color(0x40FFFFFF);
 
-    return TableColumnControls.realtime(
-      columns: (tableWidgetKey) => columns,
-      // We can freely cast the columns here thanks to the override of [_MyTableColumn.copyWith]
-
-      // Note that both the [TableColumnControls] and the [TableView]/[SliverTableView] must be rebuilt when columns
-      // change
-      onColumnTranslate: (tableWidgetKey, index, newTranslation) => setState(
-        () => columns[index] =
-            columns[index].copyWith(translation: newTranslation),
-      ),
-      onColumnResize: (tableWidgetKey, index, newWidth) => setState(
-        () => columns[index] = columns[index].copyWith(width: newWidth),
-      ),
-      onColumnMove: (tableWidgetKey, oldIndex, newIndex) => setState(
-        () => columns.insert(newIndex, columns.removeAt(oldIndex)),
-      ),
-      leadingImmovableColumnCount: (tableWidgetKey) => 1,
-      popupBuilder: (context, tableWidgetKey, animation, secondaryAnimation,
-              columnWidth) =>
-          PreferredSize(
-        preferredSize: Size(min(256, max(192, columnWidth)), 256),
-        child: FadeTransition(
-          opacity: animation,
-          child: Material(
-            type: MaterialType.card,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              side: Divider.createBorderSide(context),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(16.0),
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(_title),
+        bottom: TabBar(
+          controller: tabController,
+          tabs: const [
+            Tooltip(
+              message:
+                  'Standalone box TableView with its own vertically scrollable space between the header and the footer',
+              child: Tab(text: 'Regular box'),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            Tooltip(
+              message:
+                  'Multiple SliverTableViews alongside other slivers scrolled vertically by its parent',
+              child: Tab(text: 'Slivers'),
+            ),
+          ],
+        ),
+      ),
+      body: ShimmerPlaceholderShadeProvider(
+        loopDuration: const Duration(seconds: 2),
+        colors: const [
+          shimmerBaseColor,
+          shimmerHighlightColor,
+          shimmerBaseColor,
+          shimmerHighlightColor,
+          shimmerBaseColor
+        ],
+        stops: const [.0, .45, .5, .95, 1],
+        builder: (context, placeholderShade) => LayoutBuilder(
+          builder: (context, constraints) {
+            // when the horizontal space is limited
+            // make the checkbox column sticky to conserve it (the space not the column)
+            columns[0] =
+                columns[0].copyWith(sticky: constraints.maxWidth <= 512);
+            return TabBarView(
+              controller: tabController,
               children: [
-                const Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Custom widget to control sorting, stickiness and whatever',
-                    ),
-                  ),
+                _buildBoxExample(
+                  context,
+                  placeholderShade,
                 ),
-                InkWell(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Button to cancel the controls',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                    ),
-                  ),
+                _buildSliverExample(
+                  context,
+                  placeholderShade,
                 ),
               ],
-            ),
-          ),
-        ),
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(_title),
-          bottom: TabBar(
-            controller: tabController,
-            tabs: const [
-              Tooltip(
-                message:
-                    'Standalone box TableView with its own vertically scrollable space between the header and the footer',
-                child: Tab(text: 'Regular box'),
-              ),
-              Tooltip(
-                message:
-                    'Multiple SliverTableViews alongside other slivers scrolled vertically by its parent',
-                child: Tab(text: 'Slivers'),
-              ),
-            ],
-          ),
-        ),
-        body: ShimmerPlaceholderShadeProvider(
-          loopDuration: const Duration(seconds: 2),
-          colors: const [
-            shimmerBaseColor,
-            shimmerHighlightColor,
-            shimmerBaseColor,
-            shimmerHighlightColor,
-            shimmerBaseColor
-          ],
-          stops: const [.0, .45, .5, .95, 1],
-          builder: (context, placeholderShade) => LayoutBuilder(
-            builder: (context, constraints) {
-              // when the horizontal space is limited
-              // make the checkbox column sticky to conserve it (the space not the column)
-              columns[0] =
-                  columns[0].copyWith(sticky: constraints.maxWidth <= 512);
-              return TabBarView(
-                controller: tabController,
-                children: [
-                  _buildBoxExample(
-                    context,
-                    placeholderShade,
-                  ),
-                  _buildSliverExample(
-                    context,
-                    placeholderShade,
-                  ),
-                ],
-              );
-            },
-          ),
+            );
+          },
         ),
       ),
     );
@@ -342,7 +280,12 @@ class _MyHomePageState extends State<MyHomePage>
             : Material(
                 type: MaterialType.transparency,
                 child: InkWell(
-                  onTap: () => TableColumnControls.of(context).invoke(column),
+                  onTap: () async {
+                    print('push');
+                    await Navigator.of(context)
+                      .push(_createColumnControlsRoute(context, column));
+                    print('popped');
+                  },
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Align(
@@ -352,6 +295,70 @@ class _MyHomePageState extends State<MyHomePage>
                   ),
                 ),
               ),
+      );
+
+  ModalRoute<void> _createColumnControlsRoute(
+    BuildContext cellBuildContext,
+    int columnIndex,
+  ) =>
+      TableColumnControlHandlesPopupRoute.realtime(
+        controlCellBuildContext: cellBuildContext,
+        columnIndex: columnIndex,
+        tableViewChanged: null,
+        onColumnTranslate: (index, newTranslation) => setState(
+          () => columns[index] =
+              columns[index].copyWith(translation: newTranslation),
+        ),
+        onColumnResize: (index, newWidth) => setState(
+          () => columns[index] = columns[index].copyWith(width: newWidth),
+        ),
+        onColumnMove: (oldIndex, newIndex) => setState(
+          () => columns.insert(newIndex, columns.removeAt(oldIndex)),
+        ),
+        leadingImmovableColumnCount: 1,
+        popupBuilder: (context, animation, secondaryAnimation, columnWidth) =>
+            PreferredSize(
+          preferredSize: Size(min(256, max(192, columnWidth)), 256),
+          child: FadeTransition(
+            opacity: animation,
+            child: Material(
+              type: MaterialType.card,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                side: Divider.createBorderSide(context),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(16.0),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        'Custom widget to control sorting, stickiness and whatever',
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Button to cancel the controls',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       );
 
   /// This is used to wrap both regular and placeholder rows to achieve fade
