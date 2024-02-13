@@ -280,12 +280,8 @@ class _MyHomePageState extends State<MyHomePage>
             : Material(
                 type: MaterialType.transparency,
                 child: InkWell(
-                  onTap: () async {
-                    print('push');
-                    await Navigator.of(context)
-                      .push(_createColumnControlsRoute(context, column));
-                    print('popped');
-                  },
+                  onTap: () => Navigator.of(context)
+                      .push(_createColumnControlsRoute(context, column)),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Align(
