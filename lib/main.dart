@@ -6,7 +6,7 @@ import 'package:material_table_view/default_animated_switcher_transition_builder
 import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:material_table_view/sliver_table_view.dart';
-import 'package:material_table_view/table_column_controls.dart';
+import 'package:material_table_view/table_column_control_handles_popup_route.dart';
 import 'package:material_table_view/table_view_typedefs.dart';
 
 void main() => runApp(const MyApp());
