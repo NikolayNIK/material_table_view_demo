@@ -51,26 +51,28 @@ class StylingControlsPopup extends ModalRoute<void> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation,
           Animation<double> secondaryAnimation) =>
-      Align(
-        alignment: Alignment.topRight,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: FadeTransition(
-            opacity: animation,
-            child: SizedBox(
-              width: 256,
-              child: IntrinsicHeight(
-                child: Material(
-                  type: MaterialType.card,
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                    side: Divider.createBorderSide(context),
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(16.0),
+      SafeArea(
+        child: Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FadeTransition(
+              opacity: animation,
+              child: SizedBox(
+                width: 256,
+                child: IntrinsicHeight(
+                  child: Material(
+                    type: MaterialType.card,
+                    clipBehavior: Clip.antiAlias,
+                    shape: RoundedRectangleBorder(
+                      side: Divider.createBorderSide(context),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(16.0),
+                      ),
                     ),
-                  ),
-                  child: StylingControls(
-                    controller: stylingController,
+                    child: StylingControls(
+                      controller: stylingController,
+                    ),
                   ),
                 ),
               ),
