@@ -8,6 +8,7 @@ import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:material_table_view/sliver_table_view.dart';
 import 'package:material_table_view/table_column_control_handles_popup_route.dart';
 import 'package:material_table_view/table_view_typedefs.dart';
+import 'package:material_table_view_demo/style_controls.dart';
 
 void main() => runApp(const MyApp());
 
@@ -84,6 +85,8 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin<MyHomePage> {
   late TabController tabController;
 
+  final stylingController = StylingController();
+
   final selection = <int>{};
   int placeholderOffsetIndex = 0;
   late Timer periodicPlaceholderOffsetIncreaseTimer;
@@ -116,6 +119,8 @@ class _MyHomePageState extends State<MyHomePage>
     periodicPlaceholderOffsetIncreaseTimer = Timer.periodic(
         const Duration(milliseconds: 1000),
         (timer) => setState(() => placeholderOffsetIndex++));
+
+    stylingController.addListener(() => setState(() {}));
   }
 
   @override
@@ -135,6 +140,13 @@ class _MyHomePageState extends State<MyHomePage>
     return Scaffold(
       appBar: AppBar(
         title: const Text(_title),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.push(context,
+                StylingControlsPopup(stylingController: stylingController)),
+            icon: const Icon(Icons.style_rounded),
+          ),
+        ],
         bottom: TabBar(
           controller: tabController,
           tabs: const [
@@ -193,6 +205,17 @@ class _MyHomePageState extends State<MyHomePage>
   ) =>
       TableView.builder(
         columns: columns,
+        style: TableViewStyle(
+          dividers: TableViewDividersStyle(
+            vertical: TableViewVerticalDividersStyle.symmetric(
+              TableViewVerticalDividerStyle(
+                  wigglesPerRow:
+                      stylingController.verticalDividerWigglesPerRow.value,
+                  wiggleOffset:
+                      stylingController.verticalDividerWiggleOffset.value),
+            ),
+          ),
+        ),
         rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
         rowCount: _rowCount - 1,
         rowBuilder: _rowBuilder,
@@ -224,12 +247,21 @@ class _MyHomePageState extends State<MyHomePage>
         slivers: [
           for (var i = 0; i < tableCount; i++) ...[
             SliverTableView.builder(
-              style: const TableViewStyle(
+              style: TableViewStyle(
                 // If we want the content to scroll out from underneath
                 // the vertical scrollbar
                 // we need to specify scroll padding here since we are
                 // managing that scrollbar.
-                scrollPadding: EdgeInsets.only(right: 10),
+                scrollPadding: const EdgeInsets.only(right: 10),
+                dividers: TableViewDividersStyle(
+                  vertical: TableViewVerticalDividersStyle.symmetric(
+                    TableViewVerticalDividerStyle(
+                        wigglesPerRow: stylingController
+                            .verticalDividerWigglesPerRow.value,
+                        wiggleOffset: stylingController
+                            .verticalDividerWiggleOffset.value),
+                  ),
+                ),
               ),
               columns: columns,
               rowHeight: itemExtent,
@@ -358,11 +390,19 @@ class _MyHomePageState extends State<MyHomePage>
       );
 
   /// This is used to wrap both regular and placeholder rows to achieve fade
-  /// transition between them.
-  Widget _wrapRow(Widget child) => AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        transitionBuilder: tableRowDefaultAnimatedSwitcherTransitionBuilder,
-        child: child,
+  /// transition between them and to insert optional row divider.
+  Widget _wrapRow(Widget child) => DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          border: stylingController.lineDividerEnabled.value
+              ? Border(bottom: Divider.createBorderSide(context))
+              : null,
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: tableRowDefaultAnimatedSwitcherTransitionBuilder,
+          child: child,
+        ),
       );
 
   Widget? _rowBuilder(
