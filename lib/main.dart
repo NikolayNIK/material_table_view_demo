@@ -62,8 +62,6 @@ class _MyTableColumn extends TableColumn {
   @override
   final ValueKey<int> key;
 
-  /// This is a vital override because [TableColumnControls] uses this method to copy the column.
-  /// Because of this we can expect [TableColumnControls] to give us an instance of this method.
   @override
   _MyTableColumn copyWith(
           {double? width,
