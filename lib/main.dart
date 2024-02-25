@@ -53,6 +53,8 @@ class _MyTableColumn extends TableColumn {
     super.sticky = false,
     super.flex = 0,
     super.translation = 0,
+    super.minResizeWidth,
+    super.maxResizeWidth,
   })  : key = ValueKey<int>(index),
         // ignore: prefer_initializing_formals
         index = index;
@@ -63,12 +65,15 @@ class _MyTableColumn extends TableColumn {
   final ValueKey<int> key;
 
   @override
-  _MyTableColumn copyWith(
-          {double? width,
-          int? freezePriority,
-          bool? sticky,
-          int? flex,
-          double? translation}) =>
+  _MyTableColumn copyWith({
+    double? width,
+    int? freezePriority,
+    bool? sticky,
+    int? flex,
+    double? translation,
+    double? minResizeWidth,
+    double? maxResizeWidth,
+  }) =>
       _MyTableColumn(
         index: index,
         width: width ?? this.width,
@@ -76,6 +81,8 @@ class _MyTableColumn extends TableColumn {
         sticky: sticky ?? this.sticky,
         flex: flex ?? this.flex,
         translation: translation ?? this.translation,
+        minResizeWidth: minResizeWidth ?? this.minResizeWidth,
+        maxResizeWidth: maxResizeWidth ?? this.maxResizeWidth,
       );
 }
 
@@ -102,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage>
       _MyTableColumn(
         index: i,
         width: 64,
+        minResizeWidth: 64.0,
         // translation: i,
         flex: i, // this will make the column expand to fill remaining width
         freezePriority: 1 *
