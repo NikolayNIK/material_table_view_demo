@@ -110,7 +110,6 @@ class _MyHomePageState extends State<MyHomePage>
         index: i,
         width: 64,
         minResizeWidth: 64.0,
-        // translation: i,
         flex: i, // this will make the column expand to fill remaining width
         freezePriority: 1 *
             (_columnsPowerOfTwo - (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
