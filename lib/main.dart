@@ -323,7 +323,7 @@ class _MyHomePageState extends State<MyHomePage>
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text("${columns[column].index}"),
+                      child: Text('${columns[column].index}'),
                     ),
                   ),
                 ),
