@@ -5,11 +5,13 @@ class StylingController with ChangeNotifier {
   final verticalDividerWigglesPerRow = ValueNotifier<int>(1);
   final verticalDividerWiggleOffset = ValueNotifier<double>(16.0);
   final lineDividerEnabled = ValueNotifier<bool>(false);
+  final useRTL = ValueNotifier<bool>(false);
 
   StylingController() {
     verticalDividerWigglesPerRow.addListener(notifyListeners);
     verticalDividerWiggleOffset.addListener(notifyListeners);
     lineDividerEnabled.addListener(notifyListeners);
+    useRTL.addListener(notifyListeners);
   }
 
   TableViewStyle get tableViewStyle => TableViewStyle(
@@ -146,6 +148,18 @@ class StylingControls extends StatelessWidget {
                   value: controller.lineDividerEnabled.value,
                   onChanged: (value) =>
                       controller.lineDividerEnabled.value = value ?? false,
+                ),
+              ),
+              Text(
+                'Use RTL layout',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              ListenableBuilder(
+                listenable: controller.useRTL,
+                builder: (context, child) => Checkbox(
+                  value: controller.useRTL.value,
+                  onChanged: (value) =>
+                      controller.useRTL.value = value ?? false,
                 ),
               ),
             ],

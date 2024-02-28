@@ -142,62 +142,67 @@ class _MyHomePageState extends State<MyHomePage>
     const shimmerBaseColor = Color(0x20808080);
     const shimmerHighlightColor = Color(0x40FFFFFF);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(_title),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.push(context,
-                StylingControlsPopup(stylingController: stylingController)),
-            icon: const Icon(Icons.style_rounded),
-          ),
-        ],
-        bottom: TabBar(
-          controller: tabController,
-          tabs: const [
-            Tooltip(
-              message:
-                  'Standalone box TableView with its own vertically scrollable space between the header and the footer',
-              child: Tab(text: 'Regular box'),
-            ),
-            Tooltip(
-              message:
-                  'Multiple SliverTableViews alongside other slivers scrolled vertically by its parent',
-              child: Tab(text: 'Slivers'),
+    return Directionality(
+      textDirection: stylingController.useRTL.value
+          ? TextDirection.rtl
+          : TextDirection.ltr,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(_title),
+          actions: [
+            IconButton(
+              onPressed: () => Navigator.push(context,
+                  StylingControlsPopup(stylingController: stylingController)),
+              icon: const Icon(Icons.style_rounded),
             ),
           ],
+          bottom: TabBar(
+            controller: tabController,
+            tabs: const [
+              Tooltip(
+                message:
+                    'Standalone box TableView with its own vertically scrollable space between the header and the footer',
+                child: Tab(text: 'Regular box'),
+              ),
+              Tooltip(
+                message:
+                    'Multiple SliverTableViews alongside other slivers scrolled vertically by its parent',
+                child: Tab(text: 'Slivers'),
+              ),
+            ],
+          ),
         ),
-      ),
-      body: ShimmerPlaceholderShadeProvider(
-        loopDuration: const Duration(seconds: 2),
-        colors: const [
-          shimmerBaseColor,
-          shimmerHighlightColor,
-          shimmerBaseColor,
-          shimmerHighlightColor,
-          shimmerBaseColor
-        ],
-        stops: const [.0, .45, .5, .95, 1],
-        builder: (context, placeholderShade) => LayoutBuilder(
-          builder: (context, constraints) {
-            // when the horizontal space is limited
-            // make the checkbox column sticky to conserve it (the space not the column)
-            columns[0] =
-                columns[0].copyWith(sticky: constraints.maxWidth <= 512);
-            return TabBarView(
-              controller: tabController,
-              children: [
-                _buildBoxExample(
-                  context,
-                  placeholderShade,
-                ),
-                _buildSliverExample(
-                  context,
-                  placeholderShade,
-                ),
-              ],
-            );
-          },
+        body: ShimmerPlaceholderShadeProvider(
+          loopDuration: const Duration(seconds: 2),
+          colors: const [
+            shimmerBaseColor,
+            shimmerHighlightColor,
+            shimmerBaseColor,
+            shimmerHighlightColor,
+            shimmerBaseColor
+          ],
+          stops: const [.0, .45, .5, .95, 1],
+          builder: (context, placeholderShade) => LayoutBuilder(
+            builder: (context, constraints) {
+              // when the horizontal space is limited
+              // make the checkbox column sticky to conserve it (the space not the column)
+              columns[0] =
+                  columns[0].copyWith(sticky: constraints.maxWidth <= 512);
+              return TabBarView(
+                controller: tabController,
+                children: [
+                  _buildBoxExample(
+                    context,
+                    placeholderShade,
+                  ),
+                  _buildSliverExample(
+                    context,
+                    placeholderShade,
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
