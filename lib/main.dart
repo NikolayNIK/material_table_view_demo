@@ -110,7 +110,8 @@ class _MyHomePageState extends State<MyHomePage>
         index: i,
         width: 64,
         minResizeWidth: 64.0,
-        flex: i, // this will make the column expand to fill remaining width
+        flex: i,
+        // this will make the column expand to fill remaining width
         freezePriority: 1 *
             (_columnsPowerOfTwo - (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
       ),
@@ -286,9 +287,13 @@ class _MyHomePageState extends State<MyHomePage>
               delegate: SliverChildBuilderDelegate(
                 childCount: 8,
                 (context, index) => Padding(
-                  padding: const EdgeInsets.only(left: 18.0),
+                  padding: stylingController.useRTL.value
+                      ? const EdgeInsets.only(right: 18.0)
+                      : const EdgeInsets.only(left: 18.0),
                   child: Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: stylingController.useRTL.value
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Text(
                       'boring old sliver list element inbetween tables #${index + rowsPerTable * i}',
                     ),
@@ -325,9 +330,13 @@ class _MyHomePageState extends State<MyHomePage>
                   onTap: () => Navigator.of(context)
                       .push(_createColumnControlsRoute(context, column)),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
+                    padding: stylingController.useRTL.value
+                        ? const EdgeInsets.only(right: 8.0)
+                        : const EdgeInsets.only(left: 8.0),
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: stylingController.useRTL.value
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Text('${columns[column].index}'),
                     ),
                   ),
@@ -453,10 +462,14 @@ class _MyHomePageState extends State<MyHomePage>
                                 (value ?? false)
                                     ? selection.add(row)
                                     : selection.remove(row)))
-                        : Align(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
+                        : Padding(
+                            padding: stylingController.useRTL.value
+                                ? const EdgeInsets.only(right: 8.0)
+                                : const EdgeInsets.only(left: 8.0),
+                            child: Align(
+                              alignment: stylingController.useRTL.value
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
                               child: Text(
                                 '${(row + 2) * columns[column].index}',
                                 style: textStyle,
@@ -502,10 +515,12 @@ class _MyHomePageState extends State<MyHomePage>
       contentBuilder(
         context,
         (context, column) => Padding(
-          padding: const EdgeInsets.only(left: 8.0),
+          padding: stylingController.useRTL.value
+              ? const EdgeInsets.only(right: 8.0)
+              : const EdgeInsets.only(left: 8.0),
           child: Align(
-            alignment: columns[column].index == 0
-                ? Alignment.center
+            alignment: stylingController.useRTL.value
+                ? Alignment.centerRight
                 : Alignment.centerLeft,
             child: Text(column == 0
                 ? '${selection.length}'
