@@ -54,8 +54,15 @@ class StylingControlsPopup extends ModalRoute<void> {
   Widget buildPage(BuildContext context, Animation<double> animation,
           Animation<double> secondaryAnimation) =>
       SafeArea(
-        child: Align(
-          alignment: Alignment.topRight,
+        child: ValueListenableBuilder(
+          valueListenable: stylingController.useRTL,
+          builder: (context, useRTL, child) => Align(
+            alignment: useRTL ? Alignment.topLeft : Alignment.topRight,
+            child: Directionality(
+              textDirection: useRTL ? TextDirection.rtl : TextDirection.ltr,
+              child: child!,
+            ),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: FadeTransition(
