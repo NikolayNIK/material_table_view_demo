@@ -234,6 +234,11 @@ class _MyHomePageState extends State<MyHomePage>
         placeholderShade: placeholderShade,
         headerBuilder: _headerBuilder,
         footerBuilder: _footerBuilder,
+        // RefreshIndicator can be used as a parent of [TableView] as well
+        bodyContainerBuilder: (context, bodyContainer) => RefreshIndicator(
+          onRefresh: () => Future.delayed(const Duration(seconds: 2)),
+          child: bodyContainer,
+        ),
       );
 
   /// Builds multiple [SliverTableView]s alongside [SliverFixedExtentList]s
@@ -253,57 +258,60 @@ class _MyHomePageState extends State<MyHomePage>
       thumbVisibility: true,
       trackVisibility: true,
       interactive: true,
-      child: CustomScrollView(
-        controller: verticalSliverExampleScrollController,
-        slivers: [
-          for (var i = 0; i < tableCount; i++) ...[
-            SliverTableView.builder(
-              style: TableViewStyle(
-                // If we want the content to scroll out from underneath
-                // the vertical scrollbar
-                // we need to specify scroll padding here since we are
-                // managing that scrollbar.
-                scrollPadding: const EdgeInsets.only(right: 10),
-                dividers: TableViewDividersStyle(
-                  vertical: TableViewVerticalDividersStyle.symmetric(
-                    TableViewVerticalDividerStyle(
-                        wigglesPerRow: stylingController
-                            .verticalDividerWigglesPerRow.value,
-                        wiggleOffset: stylingController
-                            .verticalDividerWiggleOffset.value),
-                  ),
-                ),
-              ),
-              columns: columns,
-              rowHeight: itemExtent,
-              rowCount: rowsPerTable,
-              rowBuilder: _rowBuilder,
-              placeholderBuilder: _placeholderBuilder,
-              placeholderShade: placeholderShade,
-              headerBuilder: _headerBuilder,
-              footerBuilder: _footerBuilder,
-            ),
-            SliverFixedExtentList(
-              delegate: SliverChildBuilderDelegate(
-                childCount: 8,
-                (context, index) => Padding(
-                  padding: stylingController.useRTL.value
-                      ? const EdgeInsets.only(right: 18.0)
-                      : const EdgeInsets.only(left: 18.0),
-                  child: Align(
-                    alignment: stylingController.useRTL.value
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    child: Text(
-                      'boring old sliver list element inbetween tables #${index + rowsPerTable * i}',
+      child: RefreshIndicator(
+        onRefresh: () => Future.delayed(const Duration(seconds: 2)),
+        child: CustomScrollView(
+          controller: verticalSliverExampleScrollController,
+          slivers: [
+            for (var i = 0; i < tableCount; i++) ...[
+              SliverTableView.builder(
+                style: TableViewStyle(
+                  // If we want the content to scroll out from underneath
+                  // the vertical scrollbar
+                  // we need to specify scroll padding here since we are
+                  // managing that scrollbar.
+                  scrollPadding: const EdgeInsets.only(right: 10),
+                  dividers: TableViewDividersStyle(
+                    vertical: TableViewVerticalDividersStyle.symmetric(
+                      TableViewVerticalDividerStyle(
+                          wigglesPerRow: stylingController
+                              .verticalDividerWigglesPerRow.value,
+                          wiggleOffset: stylingController
+                              .verticalDividerWiggleOffset.value),
                     ),
                   ),
                 ),
+                columns: columns,
+                rowHeight: itemExtent,
+                rowCount: rowsPerTable,
+                rowBuilder: _rowBuilder,
+                placeholderBuilder: _placeholderBuilder,
+                placeholderShade: placeholderShade,
+                headerBuilder: _headerBuilder,
+                footerBuilder: _footerBuilder,
               ),
-              itemExtent: itemExtent,
-            )
+              SliverFixedExtentList(
+                delegate: SliverChildBuilderDelegate(
+                  childCount: 8,
+                  (context, index) => Padding(
+                    padding: stylingController.useRTL.value
+                        ? const EdgeInsets.only(right: 18.0)
+                        : const EdgeInsets.only(left: 18.0),
+                    child: Align(
+                      alignment: stylingController.useRTL.value
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Text(
+                        'boring old sliver list element inbetween tables #${index + rowsPerTable * i}',
+                      ),
+                    ),
+                  ),
+                ),
+                itemExtent: itemExtent,
+              )
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
