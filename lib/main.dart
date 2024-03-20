@@ -115,6 +115,11 @@ class _MyHomePageState extends State<MyHomePage>
         freezePriority: 1 *
             (_columnsPowerOfTwo - (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
       ),
+    _MyTableColumn(
+      index: -1,
+      width: 56.0,
+      freezePriority: 1 * (_columnsPowerOfTwo + 1),
+    ),
   ];
 
   @override
@@ -230,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage>
         rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
         rowCount: _rowCount - 1,
         rowBuilder: _rowBuilder,
-        placeholderBuilder: _placeholderBuilder,
+        placeholderRowBuilder: _placeholderBuilder,
         placeholderShade: placeholderShade,
         headerBuilder: _headerBuilder,
         footerBuilder: _footerBuilder,
@@ -239,6 +244,7 @@ class _MyHomePageState extends State<MyHomePage>
           onRefresh: () => Future.delayed(const Duration(seconds: 2)),
           child: bodyContainer,
         ),
+        onRowReorder: (oldIndex, newIndex) => print('$oldIndex -> $newIndex'),
       );
 
   /// Builds multiple [SliverTableView]s alongside [SliverFixedExtentList]s
@@ -285,10 +291,12 @@ class _MyHomePageState extends State<MyHomePage>
                 rowHeight: itemExtent,
                 rowCount: rowsPerTable,
                 rowBuilder: _rowBuilder,
-                placeholderBuilder: _placeholderBuilder,
+                placeholderRowBuilder: _placeholderBuilder,
                 placeholderShade: placeholderShade,
                 headerBuilder: _headerBuilder,
                 footerBuilder: _footerBuilder,
+                onRowReorder: (oldIndex, newIndex) =>
+                    print('$oldIndex -> $newIndex'),
               ),
               SliverFixedExtentList(
                 delegate: SliverChildBuilderDelegate(
@@ -322,8 +330,10 @@ class _MyHomePageState extends State<MyHomePage>
   ) =>
       contentBuilder(
         context,
-        (context, column) => columns[column].index == 0
-            ? Checkbox(
+        (context, column) {
+          switch (columns[column].index) {
+            case 0:
+              return Checkbox(
                 value: selection.isEmpty ? false : null,
                 tristate: true,
                 onChanged: (value) {
@@ -331,8 +341,11 @@ class _MyHomePageState extends State<MyHomePage>
                     setState(() => selection.clear());
                   }
                 },
-              )
-            : Material(
+              );
+            case -1:
+              return const SizedBox();
+            default:
+              return Material(
                 type: MaterialType.transparency,
                 child: InkWell(
                   onTap: () => Navigator.of(context)
@@ -349,7 +362,9 @@ class _MyHomePageState extends State<MyHomePage>
                     ),
                   ),
                 ),
-              ),
+              );
+          }
+        },
       );
 
   ModalRoute<void> _createColumnControlsRoute(
@@ -418,17 +433,20 @@ class _MyHomePageState extends State<MyHomePage>
 
   /// This is used to wrap both regular and placeholder rows to achieve fade
   /// transition between them and to insert optional row divider.
-  Widget _wrapRow(Widget child) => DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          border: stylingController.lineDividerEnabled.value
-              ? Border(bottom: Divider.createBorderSide(context))
-              : null,
-        ),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          transitionBuilder: tableRowDefaultAnimatedSwitcherTransitionBuilder,
-          child: child,
+  Widget _wrapRow(int index, Widget child) => KeyedSubtree(
+        key: ValueKey(index),
+        child: DecoratedBox(
+          position: DecorationPosition.foreground,
+          decoration: BoxDecoration(
+            border: stylingController.lineDividerEnabled.value
+                ? Border(bottom: Divider.createBorderSide(context))
+                : null,
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: tableRowDefaultAnimatedSwitcherTransitionBuilder,
+            child: child,
+          ),
         ),
       );
 
@@ -448,6 +466,7 @@ class _MyHomePageState extends State<MyHomePage>
     return (row + placeholderOffsetIndex) % 99 < 33
         ? null
         : _wrapRow(
+            row,
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               color: Theme.of(context)
@@ -461,33 +480,44 @@ class _MyHomePageState extends State<MyHomePage>
                     selection.clear();
                     selection.add(row);
                   }),
-                  child: contentBuilder(
-                    context,
-                    (context, column) => columns[column].index == 0
-                        ? Checkbox(
+                  child: contentBuilder(context, (context, column) {
+                    switch (columns[column].index) {
+                      case 0:
+                        return Checkbox(
                             value: selection.contains(row),
                             onChanged: (value) => setState(() =>
                                 (value ?? false)
                                     ? selection.add(row)
-                                    : selection.remove(row)))
-                        : Padding(
-                            padding: stylingController.useRTL.value
-                                ? const EdgeInsets.only(right: 8.0)
-                                : const EdgeInsets.only(left: 8.0),
-                            child: Align(
-                              alignment: stylingController.useRTL.value
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Text(
-                                '${(row + 2) * columns[column].index}',
-                                style: textStyle,
-                                overflow: TextOverflow.fade,
-                                maxLines: 1,
-                                softWrap: false,
-                              ),
+                                    : selection.remove(row)));
+                      case -1:
+                        return ReorderableDragStartListener(
+                          index: row,
+                          child: const SizedBox(
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Icon(Icons.drag_indicator),
+                          ),
+                        );
+                      default:
+                        return Padding(
+                          padding: stylingController.useRTL.value
+                              ? const EdgeInsets.only(right: 8.0)
+                              : const EdgeInsets.only(left: 8.0),
+                          child: Align(
+                            alignment: stylingController.useRTL.value
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Text(
+                              '${(row + 2) * columns[column].index}',
+                              style: textStyle,
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
                             ),
                           ),
-                  ),
+                        );
+                    }
+                  }),
                 ),
               ),
             ),
@@ -496,23 +526,39 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget _placeholderBuilder(
     BuildContext context,
+    int row,
     TableRowContentBuilder contentBuilder,
   ) =>
       _wrapRow(
+        row,
         contentBuilder(
           context,
-          (context, column) => columns[column].index == 0
-              ? const Checkbox(
+          (context, column) {
+            switch (columns[column].index) {
+              case 0:
+                return const Checkbox(
                   value: false,
                   onChanged: _dummyCheckboxOnChanged,
-                )
-              : const Padding(
+                );
+              case -1:
+                return ReorderableDragStartListener(
+                  index: row,
+                  child: const SizedBox(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: Icon(Icons.drag_indicator),
+                  ),
+                );
+              default:
+                return const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: DecoratedBox(
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(Radius.circular(16)))),
-                ),
+                );
+            }
+          },
         ),
       );
 
