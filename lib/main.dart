@@ -235,6 +235,13 @@ class _MyHomePageState extends State<MyHomePage>
         rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
         rowCount: _rowCount - 1,
         rowBuilder: _rowBuilder,
+        rowReorder: TableRowReorder(
+          onReorder: (oldIndex, newIndex) {
+            // for the purposes of the demo we do not handle actual
+            // row reordering
+            print('$oldIndex -> $newIndex');
+          },
+        ),
         placeholderRowBuilder: _placeholderBuilder,
         placeholderShade: placeholderShade,
         headerBuilder: _headerBuilder,
@@ -244,7 +251,6 @@ class _MyHomePageState extends State<MyHomePage>
           onRefresh: () => Future.delayed(const Duration(seconds: 2)),
           child: bodyContainer,
         ),
-        onRowReorder: (oldIndex, newIndex) => print('$oldIndex -> $newIndex'),
       );
 
   /// Builds multiple [SliverTableView]s alongside [SliverFixedExtentList]s
@@ -291,12 +297,17 @@ class _MyHomePageState extends State<MyHomePage>
                 rowHeight: itemExtent,
                 rowCount: rowsPerTable,
                 rowBuilder: _rowBuilder,
+                rowReorder: TableRowReorder(
+                  onReorder: (oldIndex, newIndex) {
+                    // for the purposes of the demo we do not handle actual
+                    // row reordering
+                    print('$oldIndex -> $newIndex');
+                  },
+                ),
                 placeholderRowBuilder: _placeholderBuilder,
                 placeholderShade: placeholderShade,
                 headerBuilder: _headerBuilder,
                 footerBuilder: _footerBuilder,
-                onRowReorder: (oldIndex, newIndex) =>
-                    print('$oldIndex -> $newIndex'),
               ),
               SliverFixedExtentList(
                 delegate: SliverChildBuilderDelegate(
