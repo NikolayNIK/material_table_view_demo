@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage>
       ),
     _MyTableColumn(
       index: -1,
-      width: 56.0,
+      width: 48.0,
       freezePriority: 1 * (_columnsPowerOfTwo + 1),
     ),
   ];
@@ -397,6 +397,7 @@ class _MyHomePageState extends State<MyHomePage>
           () => columns.insert(newIndex, columns.removeAt(oldIndex)),
         ),
         leadingImmovableColumnCount: 1,
+        trailingImmovableColumnCount: 1,
         popupBuilder: (context, animation, secondaryAnimation, columnWidth) =>
             PreferredSize(
           preferredSize: Size(min(256, max(192, columnWidth)), 256),
@@ -579,19 +580,24 @@ class _MyHomePageState extends State<MyHomePage>
   ) =>
       contentBuilder(
         context,
-        (context, column) => Padding(
-          padding: stylingController.useRTL.value
-              ? const EdgeInsets.only(right: 8.0)
-              : const EdgeInsets.only(left: 8.0),
-          child: Align(
-            alignment: stylingController.useRTL.value
-                ? Alignment.centerRight
-                : Alignment.centerLeft,
-            child: Text(column == 0
-                ? '${selection.length}'
-                : '${columns[column].index}'),
-          ),
-        ),
+        (context, column) {
+          final index = columns[column].index;
+          if (index == -1) {
+            return const SizedBox();
+          }
+
+          return Padding(
+            padding: stylingController.useRTL.value
+                ? const EdgeInsets.only(right: 8.0)
+                : const EdgeInsets.only(left: 8.0),
+            child: Align(
+              alignment: stylingController.useRTL.value
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: Text(index == 0 ? '${selection.length}' : '$index'),
+            ),
+          );
+        },
       );
 
   /// This is used to create const [Checkbox]es that are enabled.

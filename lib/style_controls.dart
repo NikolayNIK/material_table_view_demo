@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:material_table_view/material_table_view.dart';
 
 class StylingController with ChangeNotifier {
-  final verticalDividerWigglesPerRow = ValueNotifier<int>(1);
-  final verticalDividerWiggleOffset = ValueNotifier<double>(16.0);
+  final verticalDividerWigglesPerRow = ValueNotifier<int>(3);
+  final verticalDividerWiggleOffset = ValueNotifier<double>(6.0);
   final lineDividerEnabled = ValueNotifier<bool>(false);
   final useRTL = ValueNotifier<bool>(false);
 
