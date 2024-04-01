@@ -253,7 +253,8 @@ class _MyHomePageState extends State<MyHomePage>
         headerBuilder: _headerBuilder,
         footerBuilder: _footerBuilder,
         // RefreshIndicator can be used as a parent of [TableView] as well
-        bodyContainerBuilder: (context, bodyContainer) => RefreshIndicator(
+        bodyContainerBuilder: (context, bodyContainer) =>
+            RefreshIndicator.adaptive(
           onRefresh: () => Future.delayed(const Duration(seconds: 2)),
           child: bodyContainer,
         ),
@@ -276,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage>
       thumbVisibility: true,
       trackVisibility: true,
       interactive: true,
-      child: RefreshIndicator(
+      child: RefreshIndicator.adaptive(
         onRefresh: () => Future.delayed(const Duration(seconds: 2)),
         child: CustomScrollView(
           controller: verticalSliverExampleScrollController,
