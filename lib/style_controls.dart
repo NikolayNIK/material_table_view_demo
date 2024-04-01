@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_table_view/material_table_view.dart';
+import 'package:material_table_view_demo/global_target_platform.dart';
 
 class StylingController with ChangeNotifier {
   final verticalDividerWigglesPerRow = ValueNotifier<int>(3);
@@ -116,6 +117,32 @@ class StylingControls extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              ValueListenableBuilder(
+                valueListenable: globalTargetPlatform,
+                builder: (context, currentPlatform, _) =>
+                    DropdownButton<TargetPlatform?>(
+                  items: <DropdownMenuItem<TargetPlatform?>>[
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Default target platform'),
+                    ),
+                  ]
+                      .followedBy(
+                        TargetPlatform.values.map(
+                          (e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e.toString()),
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                  value: currentPlatform,
+                  onChanged: (value) => globalTargetPlatform.value = value,
+                ),
+              ),
+              SizedBox(
+                height: 16.0 + 4.0 * Theme.of(context).visualDensity.vertical,
+              ),
               Text(
                 'Number of wiggles in vertical dividers per row',
                 style: Theme.of(context).textTheme.labelLarge,

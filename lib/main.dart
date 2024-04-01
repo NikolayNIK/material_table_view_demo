@@ -8,6 +8,7 @@ import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:material_table_view/sliver_table_view.dart';
 import 'package:material_table_view/table_column_control_handles_popup_route.dart';
 import 'package:material_table_view/table_view_typedefs.dart';
+import 'package:material_table_view_demo/global_target_platform.dart';
 import 'package:material_table_view_demo/style_controls.dart';
 
 void main() => runApp(const MyApp());
@@ -18,15 +19,20 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: _title,
-        theme: _appTheme(Brightness.light),
-        darkTheme: _appTheme(Brightness.dark),
-        home: const MyHomePage(),
+  Widget build(BuildContext context) => ValueListenableBuilder(
+        valueListenable: globalTargetPlatform,
+        builder: (context, targetPlatform, _) => MaterialApp(
+          title: _title,
+          theme: _appTheme(Brightness.light, targetPlatform),
+          darkTheme: _appTheme(Brightness.dark, targetPlatform),
+          home: const MyHomePage(),
+        ),
       );
 
-  ThemeData _appTheme(Brightness brightness) => ThemeData(
+  ThemeData _appTheme(Brightness brightness, TargetPlatform? platform) =>
+      ThemeData(
         useMaterial3: true,
+        platform: platform,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blueGrey,
           brightness: brightness,
