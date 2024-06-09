@@ -237,6 +237,14 @@ class _MyHomePageState extends State<MyHomePage>
                       stylingController.verticalDividerWiggleOffset.value),
             ),
           ),
+          scrollbars: const TableViewScrollbarsStyle.symmetric(
+            TableViewScrollbarStyle(
+              interactive: true,
+              enabled: TableViewScrollbarEnabled.always,
+              thumbVisibility: WidgetStatePropertyAll(true),
+              trackVisibility: WidgetStatePropertyAll(true),
+            ),
+          ),
         ),
         rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
         rowCount: _rowCount - 1,
@@ -297,6 +305,14 @@ class _MyHomePageState extends State<MyHomePage>
                               .verticalDividerWigglesPerRow.value,
                           wiggleOffset: stylingController
                               .verticalDividerWiggleOffset.value),
+                    ),
+                  ),
+                  scrollbars: const TableViewScrollbarsStyle.symmetric(
+                    TableViewScrollbarStyle(
+                      interactive: true,
+                      enabled: TableViewScrollbarEnabled.always,
+                      thumbVisibility: WidgetStatePropertyAll(true),
+                      trackVisibility: WidgetStatePropertyAll(true),
                     ),
                   ),
                 ),
