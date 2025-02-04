@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_table_view/default_animated_switcher_transition_builder.dart';
 import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view/shimmer_placeholder_shade.dart';
@@ -10,6 +11,7 @@ import 'package:material_table_view/table_column_control_handles_popup_route.dar
 import 'package:material_table_view/table_view_typedefs.dart';
 import 'package:material_table_view_demo/global_target_platform.dart';
 import 'package:material_table_view_demo/style_controls.dart';
+import 'package:yaml/yaml.dart';
 
 void main() => runApp(const MaterialTableViewDemoApp());
 
@@ -166,7 +168,24 @@ class _DemoPageState extends State<DemoPage>
           : TextDirection.ltr,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(_title),
+          title: FutureBuilder(
+            future: rootBundle.loadString('pubspec.lock'),
+            builder: (context, snapshot) {
+              String? version;
+              if (snapshot.hasData) {
+                try {
+                  var yaml = loadYaml(snapshot.data!);
+                  version = yaml['packages']['material_table_view']['version'];
+                } catch (e) {
+                  // just in case, we ignore that
+                }
+              }
+
+              return Text(
+                version == null ? _title : 'material_table_view $version demo',
+              );
+            },
+          ),
           actions: [
             IconButton(
               onPressed: () => Navigator.push(
