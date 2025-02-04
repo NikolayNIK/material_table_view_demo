@@ -11,12 +11,15 @@ import 'package:material_table_view/table_view_typedefs.dart';
 import 'package:material_table_view_demo/global_target_platform.dart';
 import 'package:material_table_view_demo/style_controls.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(const MaterialTableViewDemoApp());
 
 const _title = 'material_table_view demo';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+/// Complicated demo app designed to showcase full range of capabilities
+/// of the `material_table_view` library. The less features you end up using,
+/// the less complicated your code will end up.
+class MaterialTableViewDemoApp extends StatelessWidget {
+  const MaterialTableViewDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder(
@@ -25,7 +28,7 @@ class MyApp extends StatelessWidget {
           title: _title,
           theme: _appTheme(Brightness.light, targetPlatform),
           darkTheme: _appTheme(Brightness.dark, targetPlatform),
-          home: const MyHomePage(),
+          home: const DemoPage(),
         ),
       );
 
@@ -40,19 +43,11 @@ class MyApp extends StatelessWidget {
       );
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-const _columnsPowerOfTwo = 12;
-const _rowCount = (1 << 31) - 1;
-
-/// Extends [TableColumn] to keep track of its original index regardless of where it happened to move to.
-class _MyTableColumn extends TableColumn {
-  _MyTableColumn({
+/// Extends [TableColumn] to keep track of its original index
+/// regardless of where it happened to move to. If the table controls are not
+/// used, feel free to simply use the [TableColumn] instead.
+class _DemoTableColumn extends TableColumn {
+  _DemoTableColumn({
     required int index,
     required super.width,
     super.freezePriority = 0,
@@ -71,7 +66,7 @@ class _MyTableColumn extends TableColumn {
   final ValueKey<int> key;
 
   @override
-  _MyTableColumn copyWith({
+  _DemoTableColumn copyWith({
     double? width,
     int? freezePriority,
     bool? sticky,
@@ -80,7 +75,7 @@ class _MyTableColumn extends TableColumn {
     double? minResizeWidth,
     double? maxResizeWidth,
   }) =>
-      _MyTableColumn(
+      _DemoTableColumn(
         index: index,
         width: width ?? this.width,
         freezePriority: freezePriority ?? this.freezePriority,
@@ -92,11 +87,21 @@ class _MyTableColumn extends TableColumn {
       );
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin<MyHomePage> {
+const _columnsPowerOfTwo = 12;
+const _rowCount = (1 << 31) - 1;
+
+class DemoPage extends StatefulWidget {
+  const DemoPage({super.key});
+
+  @override
+  State<DemoPage> createState() => _DemoPageState();
+}
+
+class _DemoPageState extends State<DemoPage>
+    with SingleTickerProviderStateMixin<DemoPage> {
   late TabController tabController;
 
-  final stylingController = StylingController();
+  final stylingController = DemoStylingController();
 
   final selection = <int>{};
   int placeholderOffsetIndex = 0;
@@ -104,15 +109,15 @@ class _MyHomePageState extends State<MyHomePage>
 
   final verticalSliverExampleScrollController = ScrollController();
 
-  final columns = <_MyTableColumn>[
-    _MyTableColumn(
+  final columns = <_DemoTableColumn>[
+    _DemoTableColumn(
       index: 0,
       width: 56.0,
       freezePriority: 1 * (_columnsPowerOfTwo + 1),
       sticky: true,
     ),
     for (var i = 1; i <= 1 << _columnsPowerOfTwo; i++)
-      _MyTableColumn(
+      _DemoTableColumn(
         index: i,
         width: 64,
         minResizeWidth: 64.0,
@@ -121,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage>
         freezePriority: 1 *
             (_columnsPowerOfTwo - (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
       ),
-    _MyTableColumn(
+    _DemoTableColumn(
       index: -1,
       width: 48.0,
       freezePriority: 1 * (_columnsPowerOfTwo + 1),
@@ -164,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage>
           actions: [
             IconButton(
               onPressed: () => Navigator.push(context,
-                  StylingControlsPopup(stylingController: stylingController)),
+                  DemoStylingControlsPopup(stylingController: stylingController)),
               icon: const Icon(Icons.style_rounded),
             ),
           ],
@@ -498,6 +503,7 @@ class _MyHomePageState extends State<MyHomePage>
           color: Theme.of(context).colorScheme.onPrimaryContainer);
     }
 
+    // Here we use placeholder based on an offset for the purposes of the demo.
     return (row + placeholderOffsetIndex) % 99 < 33
         ? null
         : _wrapRow(
@@ -626,6 +632,7 @@ class _MyHomePageState extends State<MyHomePage>
   /// This is used to create const [Checkbox]es that are enabled.
   static void _dummyCheckboxOnChanged(bool? _) {}
 
+  /// Returns log2(number) if it is integer.
   static int? _getPowerOfTwo(int number) {
     assert(!number.isNegative);
     if (number == 0) return null;

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view_demo/global_target_platform.dart';
 
-class StylingController with ChangeNotifier {
+/// Holds [TableViewStyle] values to allow changing them on the fly
+/// for the purposes of the demo.
+class DemoStylingController with ChangeNotifier {
   final verticalDividerWigglesPerRow = ValueNotifier<int>(3);
   final verticalDividerWiggleOffset = ValueNotifier<double>(6.0);
   final lineDividerEnabled = ValueNotifier<bool>(false);
   final useRTL = ValueNotifier<bool>(false);
 
-  StylingController() {
+  DemoStylingController() {
     verticalDividerWigglesPerRow.addListener(notifyListeners);
     verticalDividerWiggleOffset.addListener(notifyListeners);
     lineDividerEnabled.addListener(notifyListeners);
@@ -35,10 +37,11 @@ class StylingController with ChangeNotifier {
   }
 }
 
-class StylingControlsPopup extends ModalRoute<void> {
-  final StylingController stylingController;
+/// Popup route for the style controls.
+class DemoStylingControlsPopup extends ModalRoute<void> {
+  final DemoStylingController stylingController;
 
-  StylingControlsPopup({
+  DemoStylingControlsPopup({
     required this.stylingController,
   });
 
@@ -80,7 +83,7 @@ class StylingControlsPopup extends ModalRoute<void> {
                         Radius.circular(16.0),
                       ),
                     ),
-                    child: StylingControls(
+                    child: DemoStylingControls(
                       controller: stylingController,
                     ),
                   ),
@@ -101,10 +104,11 @@ class StylingControlsPopup extends ModalRoute<void> {
   Duration get transitionDuration => const Duration(milliseconds: 200);
 }
 
-class StylingControls extends StatelessWidget {
-  final StylingController controller;
+/// Widget to control [TableViewStyle] values.
+class DemoStylingControls extends StatelessWidget {
+  final DemoStylingController controller;
 
-  const StylingControls({
+  const DemoStylingControls({
     super.key,
     required this.controller,
   });
