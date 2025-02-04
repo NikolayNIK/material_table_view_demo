@@ -1,7 +1,8 @@
 # material_table_view demo project
 
-This is the demo project designed to showcase
-the [material_table_view](https://pub.dev/packages/material_table_view) package.
+This is a complicated demo project designed to showcase full range of capabilities of
+the [material_table_view](https://pub.dev/packages/material_table_view) package. The fewer features you end up using,
+the less complicated your code will end up.
 
 ## Usage
 
