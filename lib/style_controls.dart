@@ -9,12 +9,14 @@ class DemoStylingController with ChangeNotifier {
   final verticalDividerWiggleOffset = ValueNotifier<double>(6.0);
   final lineDividerEnabled = ValueNotifier<bool>(false);
   final useRTL = ValueNotifier<bool>(false);
+  final doExpansion = ValueNotifier<bool>(true);
 
   DemoStylingController() {
     verticalDividerWiggleCount.addListener(notifyListeners);
     verticalDividerWiggleOffset.addListener(notifyListeners);
     lineDividerEnabled.addListener(notifyListeners);
     useRTL.addListener(notifyListeners);
+    doExpansion.addListener(notifyListeners);
   }
 
   TableViewStyle get tableViewStyle => TableViewStyle(
@@ -33,6 +35,8 @@ class DemoStylingController with ChangeNotifier {
     verticalDividerWiggleCount.removeListener(notifyListeners);
     verticalDividerWiggleOffset.removeListener(notifyListeners);
     lineDividerEnabled.removeListener(notifyListeners);
+    useRTL.removeListener(notifyListeners);
+    doExpansion.removeListener(notifyListeners);
     super.dispose();
   }
 }
@@ -156,8 +160,7 @@ class DemoStylingControls extends StatelessWidget {
                 builder: (context, _) => Slider(
                   min: .0,
                   max: 16.0,
-                  value:
-                      controller.verticalDividerWiggleCount.value.toDouble(),
+                  value: controller.verticalDividerWiggleCount.value.toDouble(),
                   onChanged: (value) => controller
                       .verticalDividerWiggleCount.value = value.round(),
                 ),
@@ -186,6 +189,18 @@ class DemoStylingControls extends StatelessWidget {
                   value: controller.lineDividerEnabled.value,
                   onChanged: (value) =>
                       controller.lineDividerEnabled.value = value ?? false,
+                ),
+              ),
+              Text(
+                'Enable selected rows expansion',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              ListenableBuilder(
+                listenable: controller.doExpansion,
+                builder: (context, child) => Checkbox(
+                  value: controller.doExpansion.value,
+                  onChanged: (value) =>
+                      controller.doExpansion.value = value ?? false,
                 ),
               ),
               Text(

@@ -88,7 +88,6 @@ class _DemoTableColumn extends TableColumn {
 }
 
 const _columnsPowerOfTwo = 12;
-const _rowCount = (1 << 31) - 1;
 
 class DemoPage extends StatefulWidget {
   const DemoPage({super.key});
@@ -132,6 +131,8 @@ class _DemoPageState extends State<DemoPage>
       freezePriority: 1 * (_columnsPowerOfTwo + 1),
     ),
   ];
+
+  double get _rowHeight => 48.0 + 4 * Theme.of(context).visualDensity.vertical;
 
   @override
   void initState() {
@@ -241,6 +242,7 @@ class _DemoPageState extends State<DemoPage>
                 wiggleCount: stylingController.verticalDividerWiggleCount.value,
                 wiggleOffset:
                     stylingController.verticalDividerWiggleOffset.value,
+                wiggleInterval: _rowHeight,
               ),
             ),
           ),
@@ -253,9 +255,17 @@ class _DemoPageState extends State<DemoPage>
             ),
           ),
         ),
-        rowHeight: 48.0 + 4 * Theme.of(context).visualDensity.vertical,
-        rowCount: _rowCount - 1,
-        rowBuilder: _rowBuilder,
+        rowHeight: stylingController.doExpansion.value ? null : _rowHeight,
+        rowHeightBuilder: stylingController.doExpansion.value
+            ? (index, dimensions) =>
+                selection.contains(index) ? 2 * _rowHeight : _rowHeight
+            : null,
+        // limit the row count when dynamic row height is used
+        rowCount: stylingController.doExpansion.value
+            ? (1 << 12) - 1
+            : ((1 << 31) - 1),
+        rowBuilder:
+            createRowBuilder(context, stylingController.doExpansion.value),
         rowReorder: TableRowReorder(
           onReorder: (oldIndex, newIndex) {
             // for the purposes of the demo we do not handle actual
@@ -266,7 +276,9 @@ class _DemoPageState extends State<DemoPage>
         placeholderRowBuilder: _placeholderBuilder,
         placeholderShade: placeholderShade,
         headerBuilder: _headerBuilder,
+        headerHeight: _rowHeight,
         footerBuilder: _footerBuilder,
+        footerHeight: _rowHeight,
         // RefreshIndicator can be used as a parent of [TableView] as well
         bodyContainerBuilder: (context, bodyContainer) =>
             RefreshIndicator.adaptive(
@@ -284,8 +296,6 @@ class _DemoPageState extends State<DemoPage>
     /// the count is on the low side to make reaching table boundaries easier
     const rowsPerTable = 90;
     const tableCount = 32;
-
-    final itemExtent = 48.0 + 4 * Theme.of(context).visualDensity.vertical;
 
     return Scrollbar(
       controller: verticalSliverExampleScrollController,
@@ -325,9 +335,9 @@ class _DemoPageState extends State<DemoPage>
                   ),
                 ),
                 columns: columns,
-                rowHeight: itemExtent,
+                rowHeight: _rowHeight,
                 rowCount: rowsPerTable,
-                rowBuilder: _rowBuilder,
+                rowBuilder: createRowBuilder(context, false),
                 rowReorder: TableRowReorder(
                   onReorder: (oldIndex, newIndex) {
                     // for the purposes of the demo we do not handle actual
@@ -357,7 +367,7 @@ class _DemoPageState extends State<DemoPage>
                     ),
                   ),
                 ),
-                itemExtent: itemExtent,
+                itemExtent: _rowHeight,
               )
             ],
           ],
@@ -493,79 +503,120 @@ class _DemoPageState extends State<DemoPage>
         ),
       );
 
-  Widget? _rowBuilder(
-    BuildContext context,
-    int row,
-    TableRowContentBuilder contentBuilder,
-  ) {
-    final selected = selection.contains(row);
+  /// Creates [TableRowBuilder] closure.
+  TableRowBuilder createRowBuilder(BuildContext context, bool doExpansion) {
+    final theme = Theme.of(context);
+    final rowTextStyle = Theme.of(context).textTheme.bodyMedium;
 
-    var textStyle = Theme.of(context).textTheme.bodyMedium;
-    if (selected) {
-      textStyle = textStyle?.copyWith(
-          color: Theme.of(context).colorScheme.onPrimaryContainer);
-    }
+    final cellPadding = stylingController.useRTL.value
+        ? const EdgeInsets.only(right: 8.0)
+        : const EdgeInsets.only(left: 8.0);
 
-    // Here we use placeholder based on an offset for the purposes of the demo.
-    return (row + placeholderOffsetIndex) % 99 < 33
-        ? null
-        : _wrapRow(
-            row,
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              color: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withAlpha(selected ? 0xFF : 0),
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  onTap: () => setState(() {
-                    selection.clear();
-                    selection.add(row);
-                  }),
-                  child: contentBuilder(context, (context, column) {
-                    switch (columns[column].index) {
-                      case 0:
-                        return Checkbox(
-                            value: selection.contains(row),
-                            onChanged: (value) => setState(() =>
-                                (value ?? false)
-                                    ? selection.add(row)
-                                    : selection.remove(row)));
-                      case -1:
-                        return ReorderableDragStartListener(
-                          index: row,
-                          child: const SizedBox(
-                            width: double.infinity,
-                            height: double.infinity,
-                            child: Icon(Icons.drag_indicator),
-                          ),
-                        );
-                      default:
-                        return Padding(
-                          padding: stylingController.useRTL.value
-                              ? const EdgeInsets.only(right: 8.0)
-                              : const EdgeInsets.only(left: 8.0),
-                          child: Align(
-                            alignment: stylingController.useRTL.value
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            child: Text(
-                              '${(row + 2) * columns[column].index}',
-                              style: textStyle,
-                              overflow: TextOverflow.fade,
-                              maxLines: 1,
-                              softWrap: false,
-                            ),
-                          ),
-                        );
-                    }
-                  }),
+    final cellAlignment = stylingController.useRTL.value
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+
+    // this can be freely inlined instead
+    return (context, row, TableRowContentBuilder contentBuilder) {
+      if ((row + placeholderOffsetIndex) % 99 < 33) {
+        return null; // show off the placeholder
+      }
+
+      final selected = selection.contains(row);
+      final textStyle = selected
+          ? rowTextStyle
+          : rowTextStyle?.copyWith(color: theme.colorScheme.onPrimaryContainer);
+
+      // this is going to be our content
+      var content = contentBuilder(context, (context, column) {
+        switch (columns[column].index) {
+          case 0:
+            return Checkbox(
+                value: selection.contains(row),
+                onChanged: (value) => setState(() => (value ?? false)
+                    ? selection.add(row)
+                    : selection.remove(row)));
+          case -1:
+            return ReorderableDragStartListener(
+              index: row,
+              child: const SizedBox(
+                width: double.infinity,
+                height: double.infinity,
+                child: Icon(Icons.drag_indicator),
+              ),
+            );
+          default:
+            return Padding(
+              padding: cellPadding,
+              child: Align(
+                alignment: cellAlignment,
+                child: Text(
+                  '${(row + 2) * columns[column].index}',
+                  style: textStyle,
+                  overflow: TextOverflow.fade,
+                  maxLines: 1,
+                  softWrap: false,
                 ),
               ),
+            );
+        }
+      });
+
+      if (selected && doExpansion) {
+        // expand the row
+        content = Column(
+          children: [
+            Flexible(child: content),
+            Flexible(
+              child: contentBuilder(
+                context,
+                (context, column) {
+                  switch (columns[column].index) {
+                    case 0:
+                    case -1:
+                      return SizedBox();
+                    default:
+                      return Padding(
+                        padding: cellPadding,
+                        child: Align(
+                          alignment: cellAlignment,
+                          child: Text(
+                            '${sqrt((row + 2) * columns[column].index)}',
+                            style: textStyle,
+                            overflow: TextOverflow.fade,
+                            maxLines: 1,
+                            softWrap: false,
+                          ),
+                        ),
+                      );
+                  }
+                },
+              ),
+            )
+          ],
+        );
+      }
+
+      // Here we use placeholder based on an offset for the purposes of the demo.
+      return _wrapRow(
+        row,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          color:
+              theme.colorScheme.primaryContainer.withAlpha(selected ? 0xFF : 0),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: () => setState(() {
+                selection.clear();
+                selection.add(row);
+              }),
+              child: content,
             ),
-          );
+          ),
+        ),
+      );
+    };
   }
 
   Widget _placeholderBuilder(
@@ -580,8 +631,8 @@ class _DemoPageState extends State<DemoPage>
           (context, column) {
             switch (columns[column].index) {
               case 0:
-                return const Checkbox(
-                  value: false,
+                return Checkbox(
+                  value: selection.contains(row),
                   onChanged: _dummyCheckboxOnChanged,
                 );
               case -1:
