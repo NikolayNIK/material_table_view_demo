@@ -543,8 +543,8 @@ class _DemoPageState extends State<DemoPage>
 
       final selected = selection.contains(row);
       final textStyle = selected
-          ? rowTextStyle
-          : rowTextStyle?.copyWith(color: theme.colorScheme.onPrimaryContainer);
+          ? rowTextStyle?.copyWith(color: theme.colorScheme.onPrimaryContainer)
+          : rowTextStyle;
 
       // this is going to be our content
       var content = contentBuilder(context, (context, column) {
