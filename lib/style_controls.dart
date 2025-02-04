@@ -5,13 +5,13 @@ import 'package:material_table_view_demo/global_target_platform.dart';
 /// Holds [TableViewStyle] values to allow changing them on the fly
 /// for the purposes of the demo.
 class DemoStylingController with ChangeNotifier {
-  final verticalDividerWigglesPerRow = ValueNotifier<int>(3);
+  final verticalDividerWiggleCount = ValueNotifier<int>(3);
   final verticalDividerWiggleOffset = ValueNotifier<double>(6.0);
   final lineDividerEnabled = ValueNotifier<bool>(false);
   final useRTL = ValueNotifier<bool>(false);
 
   DemoStylingController() {
-    verticalDividerWigglesPerRow.addListener(notifyListeners);
+    verticalDividerWiggleCount.addListener(notifyListeners);
     verticalDividerWiggleOffset.addListener(notifyListeners);
     lineDividerEnabled.addListener(notifyListeners);
     useRTL.addListener(notifyListeners);
@@ -22,7 +22,7 @@ class DemoStylingController with ChangeNotifier {
           vertical: TableViewVerticalDividersStyle.symmetric(
             TableViewVerticalDividerStyle(
               wiggleOffset: verticalDividerWiggleOffset.value,
-              wigglesPerRow: verticalDividerWigglesPerRow.value,
+              wiggleCount: verticalDividerWiggleCount.value,
             ),
           ),
         ),
@@ -30,7 +30,7 @@ class DemoStylingController with ChangeNotifier {
 
   @override
   void dispose() {
-    verticalDividerWigglesPerRow.removeListener(notifyListeners);
+    verticalDividerWiggleCount.removeListener(notifyListeners);
     verticalDividerWiggleOffset.removeListener(notifyListeners);
     lineDividerEnabled.removeListener(notifyListeners);
     super.dispose();
@@ -152,14 +152,14 @@ class DemoStylingControls extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               ListenableBuilder(
-                listenable: controller.verticalDividerWigglesPerRow,
+                listenable: controller.verticalDividerWiggleCount,
                 builder: (context, _) => Slider(
                   min: .0,
                   max: 16.0,
                   value:
-                      controller.verticalDividerWigglesPerRow.value.toDouble(),
+                      controller.verticalDividerWiggleCount.value.toDouble(),
                   onChanged: (value) => controller
-                      .verticalDividerWigglesPerRow.value = value.round(),
+                      .verticalDividerWiggleCount.value = value.round(),
                 ),
               ),
               Text(

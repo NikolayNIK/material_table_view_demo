@@ -168,8 +168,10 @@ class _DemoPageState extends State<DemoPage>
           title: const Text(_title),
           actions: [
             IconButton(
-              onPressed: () => Navigator.push(context,
-                  DemoStylingControlsPopup(stylingController: stylingController)),
+              onPressed: () => Navigator.push(
+                context,
+                DemoStylingControlsPopup(stylingController: stylingController),
+              ),
               icon: const Icon(Icons.style_rounded),
             ),
           ],
@@ -236,10 +238,10 @@ class _DemoPageState extends State<DemoPage>
           dividers: TableViewDividersStyle(
             vertical: TableViewVerticalDividersStyle.symmetric(
               TableViewVerticalDividerStyle(
-                  wigglesPerRow:
-                      stylingController.verticalDividerWigglesPerRow.value,
-                  wiggleOffset:
-                      stylingController.verticalDividerWiggleOffset.value),
+                wiggleCount: stylingController.verticalDividerWiggleCount.value,
+                wiggleOffset:
+                    stylingController.verticalDividerWiggleOffset.value,
+              ),
             ),
           ),
           scrollbars: const TableViewScrollbarsStyle.symmetric(
@@ -306,10 +308,11 @@ class _DemoPageState extends State<DemoPage>
                   dividers: TableViewDividersStyle(
                     vertical: TableViewVerticalDividersStyle.symmetric(
                       TableViewVerticalDividerStyle(
-                          wigglesPerRow: stylingController
-                              .verticalDividerWigglesPerRow.value,
-                          wiggleOffset: stylingController
-                              .verticalDividerWiggleOffset.value),
+                        wiggleCount:
+                            stylingController.verticalDividerWiggleCount.value,
+                        wiggleOffset:
+                            stylingController.verticalDividerWiggleOffset.value,
+                      ),
                     ),
                   ),
                   scrollbars: const TableViewScrollbarsStyle.symmetric(
