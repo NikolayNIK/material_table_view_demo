@@ -16,7 +16,7 @@ void main() => runApp(const MaterialTableViewDemoApp());
 const _title = 'material_table_view demo';
 
 /// Complicated demo app designed to showcase full range of capabilities
-/// of the `material_table_view` library. The less features you end up using,
+/// of the `material_table_view` library. The fewer features you end up using,
 /// the less complicated your code will end up.
 class MaterialTableViewDemoApp extends StatelessWidget {
   const MaterialTableViewDemoApp({super.key});
