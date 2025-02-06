@@ -122,8 +122,6 @@ class _DemoPageState extends State<DemoPage>
         index: i,
         width: 64,
         minResizeWidth: 64.0,
-        flex: i,
-        // this will make the column expand to fill remaining width
         freezePriority: 1 *
             (_columnsPowerOfTwo - (_getPowerOfTwo(i) ?? _columnsPowerOfTwo)),
       ),
@@ -222,25 +220,19 @@ class _DemoPageState extends State<DemoPage>
           ],
           stops: const [.0, .45, .5, .95, 1],
           builder: (context, placeholderShade) => LayoutBuilder(
-            builder: (context, constraints) {
-              // when the horizontal space is limited
-              // make the checkbox column sticky to conserve it (the space not the column)
-              columns[0] =
-                  columns[0].copyWith(sticky: constraints.maxWidth <= 512);
-              return TabBarView(
-                controller: tabController,
-                children: [
-                  _buildBoxExample(
-                    context,
-                    placeholderShade,
-                  ),
-                  _buildSliverExample(
-                    context,
-                    placeholderShade,
-                  ),
-                ],
-              );
-            },
+            builder: (context, constraints) => TabBarView(
+              controller: tabController,
+              children: [
+                _buildBoxExample(
+                  context,
+                  placeholderShade,
+                ),
+                _buildSliverExample(
+                  context,
+                  placeholderShade,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -405,16 +397,22 @@ class _DemoPageState extends State<DemoPage>
           switch (columns[column].index) {
             case 0:
               return Checkbox(
-                value: selection.isEmpty ? false : null,
-                tristate: true,
-                onChanged: (value) {
-                  if (!(value ?? true)) {
-                    setState(() => selection.clear());
-                  }
-                },
-              );
+                  value: selection.isEmpty ? false : null,
+                  tristate: true,
+                  onChanged: (value) => Navigator.of(context)
+                      .push(_createColumnControlsRoute(context, column)));
             case -1:
-              return const SizedBox();
+              return Center(
+                child: SizedBox(
+                  width: _rowHeight,
+                  height: _rowHeight,
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context)
+                        .push(_createColumnControlsRoute(context, column)),
+                    icon: Icon(Icons.more_vert),
+                  ),
+                ),
+              );
             default:
               return Material(
                 type: MaterialType.transparency,
@@ -456,11 +454,11 @@ class _DemoPageState extends State<DemoPage>
         onColumnMove: (oldIndex, newIndex) => setState(
           () => columns.insert(newIndex, columns.removeAt(oldIndex)),
         ),
-        leadingImmovableColumnCount: 1,
-        trailingImmovableColumnCount: 1,
+        leadingImmovableColumnCount: 0,
+        trailingImmovableColumnCount: 0,
         popupBuilder: (context, animation, secondaryAnimation, columnWidth) =>
             PreferredSize(
-          preferredSize: Size(min(256, max(192, columnWidth)), 256),
+          preferredSize: Size(min(320, max(256, columnWidth)), 256),
           child: FadeTransition(
             opacity: animation,
             child: Material(
@@ -472,31 +470,15 @@ class _DemoPageState extends State<DemoPage>
                   Radius.circular(16.0),
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'Custom widget to control sorting, stickiness and whatever',
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Button to cancel the controls',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                      ),
-                    ),
-                  ),
-                ],
+              child: _DemoColumnEditor(
+                column: columns[columnIndex],
+                onChanged: (column) => setState(
+                  () {
+                    final index = columns
+                        .indexWhere((element) => element.key == column.key);
+                    columns[index] = column;
+                  },
+                ),
               ),
             ),
           ),
@@ -718,4 +700,173 @@ class _DemoPageState extends State<DemoPage>
       number = (number & ~1) >> 1;
     }
   }
+}
+
+class _DemoColumnEditor extends StatefulWidget {
+  final _DemoTableColumn column;
+  final void Function(_DemoTableColumn column) onChanged;
+
+  const _DemoColumnEditor({
+    super.key,
+    required this.column,
+    required this.onChanged,
+  });
+
+  @override
+  State<_DemoColumnEditor> createState() => _DemoColumnEditorState();
+}
+
+class _DemoColumnEditorState extends State<_DemoColumnEditor> {
+  late TextEditingController _freezePriorityController, _flexController;
+
+  late ValueNotifier<bool> _stickyController;
+
+  final _freezePriorityErrorText = ValueNotifier<String?>(null);
+
+  @override
+  void initState() {
+    super.initState();
+
+    _freezePriorityController =
+        TextEditingController(text: widget.column.freezePriority.toString());
+
+    _flexController =
+        TextEditingController(text: widget.column.flex.toString());
+
+    _stickyController = ValueNotifier(widget.column.sticky);
+
+    resetFreezePriorityError() => _freezePriorityErrorText.value = null;
+    _freezePriorityController.addListener(resetFreezePriorityError);
+    _stickyController.addListener(resetFreezePriorityError);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _freezePriorityController.dispose();
+    _flexController.dispose();
+    _stickyController.dispose();
+    _freezePriorityErrorText.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Stack(
+        fit: StackFit.expand,
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+              top: 16.0,
+              bottom: 48.0,
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16.0,
+                    top: 4.0,
+                    right: 16.0,
+                    bottom: 4.0,
+                  ),
+                  child: TextField(
+                    controller: _flexController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(12.0),
+                        ),
+                      ),
+                      labelText: 'Flex',
+                      hintText: 'Larger is higher',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16.0,
+                    top: 4.0,
+                    right: 16.0,
+                    bottom: 4.0,
+                  ),
+                  child: ValueListenableBuilder(
+                      valueListenable: _freezePriorityErrorText,
+                      builder: (context, errorText, _) {
+                        return TextField(
+                          controller: _freezePriorityController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(12.0),
+                              ),
+                            ),
+                            labelText: 'Freeze priority',
+                            hintText: 'Larger is higher',
+                            errorText: errorText,
+                          ),
+                        );
+                      }),
+                ),
+                ListenableBuilder(
+                  listenable: _stickyController,
+                  builder: (context, _) => SwitchListTile.adaptive(
+                    title: Text('Sticky'),
+                    subtitle: Text('Scroll off even when frozen'),
+                    value: _stickyController.value,
+                    onChanged: (value) => _stickyController.value = value,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: SizedBox(
+              height: 48.0,
+              child: Material(
+                type: MaterialType.card,
+                color: Theme.of(context).scaffoldBackgroundColor.withValues(
+                      alpha: .9,
+                    ),
+                child: InkWell(
+                  onTap: () {
+                    final freezePriority =
+                        int.tryParse(_freezePriorityController.text);
+                    final sticky = _stickyController.value;
+
+                    if (sticky &&
+                        (freezePriority == null || freezePriority <= 0)) {
+                      _freezePriorityErrorText.value =
+                          'Only freezable columns may be sticky';
+                      return;
+                    }
+
+                    widget.onChanged(
+                      widget.column.copyWith(
+                        freezePriority: freezePriority,
+                        flex: int.tryParse(_flexController.text),
+                        sticky: sticky,
+                      ),
+                    );
+
+                    Navigator.of(context).pop();
+                  },
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'APPLY',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
 }
