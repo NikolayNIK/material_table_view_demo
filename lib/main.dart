@@ -473,7 +473,7 @@ class _DemoPageState extends State<DemoPage>
             ),
             child: _DemoColumnEditor(
               column: column,
-              onChanged: (column) => setState(
+              onClickApply: (column) => setState(
                 () {
                   final index = columns
                       .indexWhere((element) => element.key == column.key);
@@ -706,12 +706,12 @@ class _DemoPageState extends State<DemoPage>
 
 class _DemoColumnEditor extends StatefulWidget {
   final _DemoTableColumn column;
-  final void Function(_DemoTableColumn column) onChanged;
+  final void Function(_DemoTableColumn column) onClickApply;
 
   const _DemoColumnEditor({
     super.key,
     required this.column,
-    required this.onChanged,
+    required this.onClickApply,
   });
 
   @override
@@ -843,7 +843,7 @@ class _DemoColumnEditorState extends State<_DemoColumnEditor> {
                       return;
                     }
 
-                    widget.onChanged(
+                    widget.onClickApply(
                       widget.column.copyWith(
                         freezePriority: freezePriority,
                         flex: int.tryParse(_flexController.text),
