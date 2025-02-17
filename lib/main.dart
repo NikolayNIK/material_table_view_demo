@@ -439,51 +439,53 @@ class _DemoPageState extends State<DemoPage>
   ModalRoute<void> _createColumnControlsRoute(
     BuildContext cellBuildContext,
     int columnIndex,
-  ) =>
-      TableColumnControlHandlesPopupRoute.realtime(
-        controlCellBuildContext: cellBuildContext,
-        columnIndex: columnIndex,
-        tableViewChanged: null,
-        onColumnTranslate: (index, newTranslation) => setState(
-          () => columns[index] =
-              columns[index].copyWith(translation: newTranslation),
-        ),
-        onColumnResize: (index, newWidth) => setState(
-          () => columns[index] = columns[index].copyWith(width: newWidth),
-        ),
-        onColumnMove: (oldIndex, newIndex) => setState(
-          () => columns.insert(newIndex, columns.removeAt(oldIndex)),
-        ),
-        leadingImmovableColumnCount: 0,
-        trailingImmovableColumnCount: 0,
-        popupBuilder: (context, animation, secondaryAnimation, columnWidth) =>
-            PreferredSize(
-          preferredSize: Size(min(320, max(256, columnWidth)), 256),
-          child: FadeTransition(
-            opacity: animation,
-            child: Material(
-              type: MaterialType.card,
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                side: Divider.createBorderSide(context),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(16.0),
-                ),
+  ) {
+    final column = columns[columnIndex];
+    return TableColumnControlHandlesPopupRoute.realtime(
+      controlCellBuildContext: cellBuildContext,
+      columnIndex: columnIndex,
+      tableViewChanged: null,
+      onColumnTranslate: (index, newTranslation) => setState(
+        () => columns[index] =
+            columns[index].copyWith(translation: newTranslation),
+      ),
+      onColumnResize: (index, newWidth) => setState(
+        () => columns[index] = columns[index].copyWith(width: newWidth),
+      ),
+      onColumnMove: (oldIndex, newIndex) => setState(
+        () => columns.insert(newIndex, columns.removeAt(oldIndex)),
+      ),
+      leadingImmovableColumnCount: 0,
+      trailingImmovableColumnCount: 0,
+      popupBuilder: (context, animation, secondaryAnimation, columnWidth) =>
+          PreferredSize(
+        preferredSize: Size(min(320, max(256, columnWidth)), 256),
+        child: FadeTransition(
+          opacity: animation,
+          child: Material(
+            type: MaterialType.card,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              side: Divider.createBorderSide(context),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(16.0),
               ),
-              child: _DemoColumnEditor(
-                column: columns[columnIndex],
-                onChanged: (column) => setState(
-                  () {
-                    final index = columns
-                        .indexWhere((element) => element.key == column.key);
-                    columns[index] = column;
-                  },
-                ),
+            ),
+            child: _DemoColumnEditor(
+              column: column,
+              onChanged: (column) => setState(
+                () {
+                  final index = columns
+                      .indexWhere((element) => element.key == column.key);
+                  columns[index] = column;
+                },
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 
   /// This is used to wrap both regular and placeholder rows to achieve fade
   /// transition between them and to insert optional row divider.
