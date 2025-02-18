@@ -607,7 +607,6 @@ class _DemoPageState extends State<DemoPage>
         );
       }
 
-      // Here we use placeholder based on an offset for the purposes of the demo.
       return _wrapRow(
         row,
         AnimatedContainer(
