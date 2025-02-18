@@ -10,6 +10,7 @@ class DemoStylingController with ChangeNotifier {
   final lineDividerEnabled = ValueNotifier<bool>(false);
   final useRTL = ValueNotifier<bool>(false);
   final doExpansion = ValueNotifier<bool>(true);
+  final statefulRandomBackground = ValueNotifier<bool>(false);
 
   DemoStylingController() {
     verticalDividerWiggleCount.addListener(notifyListeners);
@@ -17,6 +18,7 @@ class DemoStylingController with ChangeNotifier {
     lineDividerEnabled.addListener(notifyListeners);
     useRTL.addListener(notifyListeners);
     doExpansion.addListener(notifyListeners);
+    statefulRandomBackground.addListener(notifyListeners);
   }
 
   TableViewStyle get tableViewStyle => TableViewStyle(
@@ -37,6 +39,7 @@ class DemoStylingController with ChangeNotifier {
     lineDividerEnabled.removeListener(notifyListeners);
     useRTL.removeListener(notifyListeners);
     doExpansion.removeListener(notifyListeners);
+    statefulRandomBackground.removeListener(notifyListeners);
     super.dispose();
   }
 }
@@ -279,6 +282,22 @@ class DemoStylingControls extends StatelessWidget {
               ),
               value: controller.useRTL.value,
               onChanged: (value) => controller.useRTL.value = value,
+            ),
+          ),
+          ListenableBuilder(
+            listenable: controller.statefulRandomBackground,
+            builder: (context, child) => SwitchListTile.adaptive(
+              title: Text(
+                maxLines: 1,
+                'Random background',
+              ),
+              subtitle: Text(
+                maxLines: 2,
+                'Stateful random background for each cell',
+              ),
+              value: controller.statefulRandomBackground.value,
+              onChanged: (value) =>
+                  controller.statefulRandomBackground.value = value,
             ),
           ),
         ],

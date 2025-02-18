@@ -10,6 +10,7 @@ import 'package:material_table_view/sliver_table_view.dart';
 import 'package:material_table_view/table_column_control_handles_popup_route.dart';
 import 'package:material_table_view/table_view_typedefs.dart';
 import 'package:material_table_view_demo/global_target_platform.dart';
+import 'package:material_table_view_demo/stateful_random_background.dart';
 import 'package:material_table_view_demo/style_controls.dart';
 import 'package:yaml/yaml.dart';
 
@@ -537,8 +538,7 @@ class _DemoPageState extends State<DemoPage>
           ? rowTextStyle?.copyWith(color: theme.colorScheme.onPrimaryContainer)
           : rowTextStyle;
 
-      // this is going to be our content
-      var content = contentBuilder(context, (context, column) {
+      var cellBuilder = (BuildContext context, int column) {
         switch (columns[column].index) {
           case 0:
             return Checkbox(
@@ -570,7 +570,16 @@ class _DemoPageState extends State<DemoPage>
               ),
             );
         }
-      });
+      };
+
+      if (stylingController.statefulRandomBackground.value) {
+        final builder = cellBuilder;
+        cellBuilder = (context, column) =>
+            StatefulRandomBackground(child: builder(context, column));
+      }
+
+      // this is going to be our content
+      var content = contentBuilder(context, cellBuilder);
 
       if (selected && doExpansion) {
         // expand the row
