@@ -440,7 +440,7 @@ class _DemoPageState extends State<DemoPage>
     BuildContext cellBuildContext,
     int columnIndex,
   ) {
-    final column = columns[columnIndex];
+    final initialColumn = columns[columnIndex];
     return TableColumnControlHandlesPopupRoute.realtime(
       controlCellBuildContext: cellBuildContext,
       columnIndex: columnIndex,
@@ -472,12 +472,19 @@ class _DemoPageState extends State<DemoPage>
               ),
             ),
             child: _DemoColumnEditor(
-              column: column,
-              onClickApply: (column) => setState(
+              column: initialColumn,
+              onClickApply: (flex, freezePriority, sticky) => setState(
                 () {
-                  final index = columns
-                      .indexWhere((element) => element.key == column.key);
-                  columns[index] = column;
+                  // find current column index
+                  final index = columns.indexWhere(
+                      (element) => element.key == initialColumn.key);
+
+                  // change the column
+                  columns[index] = columns[index].copyWith(
+                    flex: flex,
+                    freezePriority: freezePriority,
+                    sticky: sticky,
+                  );
                 },
               ),
             ),
@@ -706,7 +713,11 @@ class _DemoPageState extends State<DemoPage>
 
 class _DemoColumnEditor extends StatefulWidget {
   final _DemoTableColumn column;
-  final void Function(_DemoTableColumn column) onClickApply;
+  final void Function(
+    int? flex,
+    int? freezePriority,
+    bool sticky,
+  ) onClickApply;
 
   const _DemoColumnEditor({
     super.key,
@@ -844,11 +855,9 @@ class _DemoColumnEditorState extends State<_DemoColumnEditor> {
                     }
 
                     widget.onClickApply(
-                      widget.column.copyWith(
-                        freezePriority: freezePriority,
-                        flex: int.tryParse(_flexController.text),
-                        sticky: sticky,
-                      ),
+                      int.tryParse(_flexController.text),
+                      freezePriority,
+                      sticky,
                     );
 
                     Navigator.of(context).pop();
