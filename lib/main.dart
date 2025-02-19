@@ -410,7 +410,10 @@ class _DemoPageState extends State<DemoPage>
                   child: IconButton(
                     onPressed: () => Navigator.of(context)
                         .push(_createColumnControlsRoute(context, column)),
-                    icon: Icon(Icons.more_vert),
+                    icon: Icon(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      Icons.more_vert,
+                    ),
                   ),
                 ),
               );
@@ -556,10 +559,13 @@ class _DemoPageState extends State<DemoPage>
           case -1:
             return ReorderableDragStartListener(
               index: row,
-              child: const SizedBox(
+              child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
-                child: Icon(Icons.drag_indicator),
+                child: Icon(
+                  color: theme.colorScheme.onSurface,
+                  Icons.drag_indicator,
+                ),
               ),
             );
           default:
