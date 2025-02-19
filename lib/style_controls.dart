@@ -62,37 +62,53 @@ class DemoStylingControlsPopup extends ModalRoute<void> {
   String? get barrierLabel => null;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation) =>
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) =>
       SafeArea(
         child: ValueListenableBuilder(
           valueListenable: stylingController.useRTL,
-          builder: (context, useRTL, child) => Align(
-            alignment: useRTL ? Alignment.topLeft : Alignment.topRight,
-            child: Directionality(
-              textDirection: useRTL ? TextDirection.rtl : TextDirection.ltr,
-              child: child!,
+          builder: (context, useRTL, child) {
+            final alignment = useRTL ? Alignment.topLeft : Alignment.topRight;
+            return Align(
+              alignment: alignment,
+              child: Directionality(
+                textDirection: useRTL ? TextDirection.rtl : TextDirection.ltr,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ScaleTransition(
+                    scale: CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.fastEaseInToSlowEaseOut,
+                    ),
+                    alignment: alignment,
+                    child: child!,
+                  ),
+                ),
+              ),
+            );
+          },
+          child: FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.fastOutSlowIn,
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: FadeTransition(
-              opacity: animation,
-              child: SizedBox(
-                width: 320,
-                child: IntrinsicHeight(
-                  child: Material(
-                    type: MaterialType.card,
-                    clipBehavior: Clip.antiAlias,
-                    shape: RoundedRectangleBorder(
-                      side: Divider.createBorderSide(context),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(16.0),
-                      ),
+            child: SizedBox(
+              width: 320,
+              child: IntrinsicHeight(
+                child: Material(
+                  type: MaterialType.card,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    side: Divider.createBorderSide(context),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(16.0),
                     ),
-                    child: DemoStylingControls(
-                      controller: stylingController,
-                    ),
+                  ),
+                  child: DemoStylingControls(
+                    controller: stylingController,
                   ),
                 ),
               ),
