@@ -9,7 +9,7 @@ class DemoStylingController with ChangeNotifier {
   final verticalDividerWiggleOffset = ValueNotifier<double>(6.0);
   final lineDividerEnabled = ValueNotifier<bool>(false);
   final useRTL = ValueNotifier<bool>(false);
-  final doExpansion = ValueNotifier<bool>(true);
+  final doExpansion = ValueNotifier<bool>(false);
   final statefulRandomBackground = ValueNotifier<bool>(false);
 
   DemoStylingController() {
