@@ -461,32 +461,39 @@ class _DemoPageState extends State<DemoPage>
       popupBuilder: (context, animation, secondaryAnimation, columnWidth) =>
           PreferredSize(
         preferredSize: Size(min(320, max(256, columnWidth)), 256),
-        child: FadeTransition(
-          opacity: animation,
-          child: Material(
-            type: MaterialType.card,
-            clipBehavior: Clip.antiAlias,
-            shape: RoundedRectangleBorder(
-              side: Divider.createBorderSide(context),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(16.0),
+        child: ScaleTransition(
+          alignment: Alignment.topCenter,
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: Curves.fastEaseInToSlowEaseOut,
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: Material(
+              type: MaterialType.card,
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                side: Divider.createBorderSide(context),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(16.0),
+                ),
               ),
-            ),
-            child: _DemoColumnEditor(
-              column: initialColumn,
-              onClickApply: (flex, freezePriority, sticky) => setState(
-                () {
-                  // find current column index
-                  final index = columns.indexWhere(
-                      (element) => element.key == initialColumn.key);
+              child: _DemoColumnEditor(
+                column: initialColumn,
+                onClickApply: (flex, freezePriority, sticky) => setState(
+                  () {
+                    // find current column index
+                    final index = columns.indexWhere(
+                        (element) => element.key == initialColumn.key);
 
-                  // change the column
-                  columns[index] = columns[index].copyWith(
-                    flex: flex,
-                    freezePriority: freezePriority,
-                    sticky: sticky,
-                  );
-                },
+                    // change the column
+                    columns[index] = columns[index].copyWith(
+                      flex: flex,
+                      freezePriority: freezePriority,
+                      sticky: sticky,
+                    );
+                  },
+                ),
               ),
             ),
           ),
