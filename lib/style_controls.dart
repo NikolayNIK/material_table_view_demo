@@ -311,6 +311,7 @@ class DemoStylingControls extends StatelessWidget {
                 maxLines: 2,
                 'Stateful random background for each cell',
               ),
+              isThreeLine: true,
               value: controller.statefulRandomBackground.value,
               onChanged: (value) =>
                   controller.statefulRandomBackground.value = value,
