@@ -140,9 +140,15 @@ class _DemoPageState extends State<DemoPage>
     super.initState();
 
     tabController = TabController(length: 2, vsync: this);
+
     periodicPlaceholderOffsetIncreaseTimer = Timer.periodic(
-        const Duration(milliseconds: 1000),
-        (timer) => setState(() => placeholderOffsetIndex++));
+      const Duration(milliseconds: 1000),
+      (timer) {
+        if (stylingController.doPlaceholdersShift.value) {
+          setState(() => placeholderOffsetIndex++);
+        }
+      },
+    );
 
     stylingController.addListener(() => setState(() {}));
   }
@@ -226,11 +232,15 @@ class _DemoPageState extends State<DemoPage>
               children: [
                 _buildBoxExample(
                   context,
-                  placeholderShade,
+                  stylingController.doPlaceholders.value
+                      ? placeholderShade
+                      : null,
                 ),
                 _buildSliverExample(
                   context,
-                  placeholderShade,
+                  stylingController.doPlaceholders.value
+                      ? placeholderShade
+                      : null,
                 ),
               ],
             ),
@@ -243,7 +253,7 @@ class _DemoPageState extends State<DemoPage>
   /// Builds a regular [TableView].
   Widget _buildBoxExample(
     BuildContext context,
-    TablePlaceholderShade placeholderShade,
+    TablePlaceholderShade? placeholderShade,
   ) =>
       TableView.builder(
         columns: columns,
@@ -303,7 +313,7 @@ class _DemoPageState extends State<DemoPage>
   /// in a single vertical [CustomScrollView].
   Widget _buildSliverExample(
     BuildContext context,
-    TablePlaceholderShade placeholderShade,
+    TablePlaceholderShade? placeholderShade,
   ) {
     /// the count is on the low side to make reaching table boundaries easier
     const rowsPerTable = 90;
@@ -539,7 +549,8 @@ class _DemoPageState extends State<DemoPage>
 
     // this can be freely inlined instead
     return (context, row, TableRowContentBuilder contentBuilder) {
-      if ((row + placeholderOffsetIndex) % 99 < 33) {
+      if (stylingController.doPlaceholders.value &&
+          (row + placeholderOffsetIndex) % 99 < 33) {
         return null; // show off the placeholder
       }
 

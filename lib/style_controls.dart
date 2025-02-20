@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view_demo/global_target_platform.dart';
@@ -11,6 +12,9 @@ class DemoStylingController with ChangeNotifier {
   final useRTL = ValueNotifier<bool>(false);
   final doExpansion = ValueNotifier<bool>(false);
   final statefulRandomBackground = ValueNotifier<bool>(false);
+  final doPlaceholders = ValueNotifier<bool>(true);
+  late final _doPlaceholdersShift =
+      _BoolConjunctionValueNotifier(doPlaceholders, true);
 
   DemoStylingController() {
     verticalDividerWiggleCount.addListener(notifyListeners);
@@ -19,7 +23,11 @@ class DemoStylingController with ChangeNotifier {
     useRTL.addListener(notifyListeners);
     doExpansion.addListener(notifyListeners);
     statefulRandomBackground.addListener(notifyListeners);
+    doPlaceholders.addListener(notifyListeners);
+    _doPlaceholdersShift.addListener(notifyListeners);
   }
+
+  get doPlaceholdersShift => _doPlaceholdersShift;
 
   TableViewStyle get tableViewStyle => TableViewStyle(
         dividers: TableViewDividersStyle(
@@ -41,6 +49,27 @@ class DemoStylingController with ChangeNotifier {
     doExpansion.removeListener(notifyListeners);
     statefulRandomBackground.removeListener(notifyListeners);
     super.dispose();
+  }
+}
+
+class _BoolConjunctionValueNotifier extends ValueNotifier<bool> {
+  _BoolConjunctionValueNotifier(
+    this._other,
+    super.value,
+  ) {
+    _other.addListener(notifyListeners);
+  }
+
+  final ValueListenable<bool> _other;
+
+  @override
+  bool get value => _other.value && super.value;
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _other.removeListener(notifyListeners);
   }
 }
 
@@ -315,6 +344,42 @@ class DemoStylingControls extends StatelessWidget {
               value: controller.statefulRandomBackground.value,
               onChanged: (value) =>
                   controller.statefulRandomBackground.value = value,
+            ),
+          ),
+          ListenableBuilder(
+            listenable: controller.doPlaceholders,
+            builder: (context, child) => SwitchListTile.adaptive(
+              title: Text(
+                maxLines: 1,
+                'Placeholders',
+              ),
+              subtitle: Text(
+                maxLines: 1,
+                'Enable placeholders with shaders',
+                overflow: TextOverflow.ellipsis,
+              ),
+              isThreeLine: false,
+              value: controller.doPlaceholders.value,
+              onChanged: (value) => controller.doPlaceholders.value = value,
+            ),
+          ),
+          ListenableBuilder(
+            listenable: controller.doPlaceholdersShift,
+            builder: (context, child) => SwitchListTile.adaptive(
+              title: Text(
+                maxLines: 1,
+                'Placeholder shifting',
+              ),
+              subtitle: Text(
+                maxLines: 1,
+                'Enable placeholder shifting',
+                overflow: TextOverflow.ellipsis,
+              ),
+              isThreeLine: false,
+              value: controller.doPlaceholdersShift.value,
+              onChanged: controller.doPlaceholders.value
+                  ? (value) => controller.doPlaceholdersShift.value = value
+                  : null,
             ),
           ),
         ],
