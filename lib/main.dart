@@ -357,9 +357,14 @@ class _DemoPageState extends State<DemoPage>
                   ),
                 ),
                 columns: columns,
-                rowHeight: _rowHeight,
                 rowCount: rowsPerTable,
-                rowBuilder: createRowBuilder(context, false),
+                rowHeight:
+                    stylingController.doExpansion.value ? null : _rowHeight,
+                rowHeightBuilder: stylingController.doExpansion.value
+                    ? (index, dimensions) =>
+                        selection.contains(index) ? 2 * _rowHeight : _rowHeight
+                    : null,
+                rowBuilder: createRowBuilder(context, stylingController.doExpansion.value),
                 rowReorder: TableRowReorder(
                   onReorder: (oldIndex, newIndex) {
                     // for the purposes of the demo we do not handle actual
@@ -369,7 +374,9 @@ class _DemoPageState extends State<DemoPage>
                 ),
                 placeholderRowBuilder: _placeholderBuilder,
                 placeholderShade: placeholderShade,
+                headerHeight: _rowHeight,
                 headerBuilder: _headerBuilder,
+                footerHeight: _rowHeight,
                 footerBuilder: _footerBuilder,
               ),
               SliverFixedExtentList(
