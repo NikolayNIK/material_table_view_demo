@@ -365,7 +365,8 @@ class _DemoPageState extends State<DemoPage>
                     ? (index, dimensions) =>
                         selection.contains(index) ? 2 * _rowHeight : _rowHeight
                     : null,
-                rowBuilder: createRowBuilder(context, stylingController.doExpansion.value),
+                rowBuilder: createRowBuilder(
+                    context, stylingController.doExpansion.value),
                 rowReorder: TableRowReorder(
                   onReorder: (oldIndex, newIndex) {
                     // for the purposes of the demo we do not handle actual
