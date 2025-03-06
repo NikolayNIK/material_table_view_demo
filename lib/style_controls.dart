@@ -306,8 +306,7 @@ class DemoStylingControls extends StatelessWidget {
               ),
               subtitle: Text(
                 maxLines: 2,
-                'Not supported for slivers,'
-                ' decreases the number of rows',
+                'Decreases the number of rows due to performance',
               ),
               isThreeLine: true,
               value: controller.doExpansion.value,
