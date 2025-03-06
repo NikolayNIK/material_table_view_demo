@@ -344,6 +344,7 @@ class _DemoPageState extends State<DemoPage>
                             stylingController.verticalDividerWiggleCount.value,
                         wiggleOffset:
                             stylingController.verticalDividerWiggleOffset.value,
+                        wiggleInterval: _rowHeight,
                       ),
                     ),
                   ),
