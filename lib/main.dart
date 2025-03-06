@@ -317,7 +317,7 @@ class _DemoPageState extends State<DemoPage>
   ) {
     /// the count is on the low side to make reaching table boundaries easier
     const rowsPerTable = 90;
-    const tableCount = 32;
+    const tableCount = 8;
 
     return Scrollbar(
       controller: verticalSliverExampleScrollController,
