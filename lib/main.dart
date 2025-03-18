@@ -363,10 +363,15 @@ class _DemoPageState extends State<DemoPage>
                     stylingController.doExpansion.value ? null : _rowHeight,
                 rowHeightBuilder: stylingController.doExpansion.value
                     ? (index, dimensions) =>
-                        selection.contains(index) ? 2 * _rowHeight : _rowHeight
+                        selection.contains(i * rowsPerTable + index)
+                            ? 2 * _rowHeight
+                            : _rowHeight
                     : null,
                 rowBuilder: createRowBuilder(
-                    context, stylingController.doExpansion.value),
+                  context,
+                  stylingController.doExpansion.value,
+                  i * rowsPerTable,
+                ),
                 rowReorder: TableRowReorder(
                   onReorder: (oldIndex, newIndex) {
                     // for the purposes of the demo we do not handle actual
@@ -544,7 +549,11 @@ class _DemoPageState extends State<DemoPage>
       );
 
   /// Creates [TableRowBuilder] closure.
-  TableRowBuilder createRowBuilder(BuildContext context, bool doExpansion) {
+  TableRowBuilder createRowBuilder(
+    BuildContext context,
+    bool doExpansion, [
+    int start = 0,
+  ]) {
     final theme = Theme.of(context);
     final rowTextStyle = Theme.of(context).textTheme.bodyMedium;
 
@@ -558,6 +567,8 @@ class _DemoPageState extends State<DemoPage>
 
     // this can be freely inlined instead
     return (context, row, TableRowContentBuilder contentBuilder) {
+      row += start;
+
       if (stylingController.doPlaceholders.value &&
           (row + placeholderOffsetIndex) % 99 < 33) {
         return null; // show off the placeholder
