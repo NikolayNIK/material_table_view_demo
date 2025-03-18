@@ -287,10 +287,12 @@ class DemoStylingControls extends StatelessWidget {
             builder: (context, child) => SwitchListTile.adaptive(
               title: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'Row divider',
               ),
               subtitle: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'Horizontal row divider',
               ),
               value: controller.lineDividerEnabled.value,
@@ -302,10 +304,12 @@ class DemoStylingControls extends StatelessWidget {
             builder: (context, child) => SwitchListTile.adaptive(
               title: Text(
                 maxLines: 1,
-                'Selected rows expansion',
+                overflow: TextOverflow.ellipsis,
+                'Expand selected rows',
               ),
               subtitle: Text(
                 maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 'Decreases the number of rows due to performance',
               ),
               isThreeLine: true,
@@ -318,10 +322,12 @@ class DemoStylingControls extends StatelessWidget {
             builder: (context, child) => SwitchListTile.adaptive(
               title: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'RTL layout',
               ),
               subtitle: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'Use right-to-left layout',
               ),
               value: controller.useRTL.value,
@@ -333,10 +339,12 @@ class DemoStylingControls extends StatelessWidget {
             builder: (context, child) => SwitchListTile.adaptive(
               title: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'Random background',
               ),
               subtitle: Text(
                 maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 'Stateful random background for each cell',
               ),
               isThreeLine: true,
@@ -350,12 +358,13 @@ class DemoStylingControls extends StatelessWidget {
             builder: (context, child) => SwitchListTile.adaptive(
               title: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'Placeholders',
               ),
               subtitle: Text(
                 maxLines: 1,
-                'Enable placeholders with shaders',
                 overflow: TextOverflow.ellipsis,
+                'Enable placeholders with shaders',
               ),
               isThreeLine: false,
               value: controller.doPlaceholders.value,
@@ -367,12 +376,13 @@ class DemoStylingControls extends StatelessWidget {
             builder: (context, child) => SwitchListTile.adaptive(
               title: Text(
                 maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 'Placeholder shifting',
               ),
               subtitle: Text(
                 maxLines: 1,
-                'Enable placeholder shifting',
                 overflow: TextOverflow.ellipsis,
+                'Enable placeholder shifting',
               ),
               isThreeLine: false,
               value: controller.doPlaceholdersShift.value,
