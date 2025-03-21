@@ -216,33 +216,35 @@ class _DemoPageState extends State<DemoPage>
             ],
           ),
         ),
-        body: ShimmerPlaceholderShadeProvider(
-          loopDuration: const Duration(seconds: 2),
-          colors: const [
-            shimmerBaseColor,
-            shimmerHighlightColor,
-            shimmerBaseColor,
-            shimmerHighlightColor,
-            shimmerBaseColor
-          ],
-          stops: const [.0, .45, .5, .95, 1],
-          builder: (context, placeholderShade) => LayoutBuilder(
-            builder: (context, constraints) => TabBarView(
-              controller: tabController,
-              children: [
-                _buildBoxExample(
-                  context,
-                  stylingController.doPlaceholders.value
-                      ? placeholderShade
-                      : null,
-                ),
-                _buildSliverExample(
-                  context,
-                  stylingController.doPlaceholders.value
-                      ? placeholderShade
-                      : null,
-                ),
-              ],
+        body: SafeArea(
+          child: ShimmerPlaceholderShadeProvider(
+            loopDuration: const Duration(seconds: 2),
+            colors: const [
+              shimmerBaseColor,
+              shimmerHighlightColor,
+              shimmerBaseColor,
+              shimmerHighlightColor,
+              shimmerBaseColor
+            ],
+            stops: const [.0, .45, .5, .95, 1],
+            builder: (context, placeholderShade) => LayoutBuilder(
+              builder: (context, constraints) => TabBarView(
+                controller: tabController,
+                children: [
+                  _buildBoxExample(
+                    context,
+                    stylingController.doPlaceholders.value
+                        ? placeholderShade
+                        : null,
+                  ),
+                  _buildSliverExample(
+                    context,
+                    stylingController.doPlaceholders.value
+                        ? placeholderShade
+                        : null,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
