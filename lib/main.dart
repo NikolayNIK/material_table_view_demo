@@ -528,6 +528,20 @@ class _DemoPageState extends State<DemoPage>
           ),
         ),
       ),
+      columnOverlayBuilder: (
+        context,
+        animation,
+        secondaryAnimation,
+      ) =>
+          FadeTransition(
+              opacity: animation,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.symmetric(
+                    vertical: Divider.createBorderSide(context),
+                  ),
+                ),
+              )),
     );
   }
 
