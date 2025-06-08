@@ -788,7 +788,6 @@ class _DemoColumnEditor extends StatefulWidget {
   ) onClickApply;
 
   const _DemoColumnEditor({
-    super.key,
     required this.column,
     required this.onClickApply,
   });
