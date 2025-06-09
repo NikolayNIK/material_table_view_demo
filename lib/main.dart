@@ -8,6 +8,7 @@ import 'package:material_table_view/material_table_view.dart';
 import 'package:material_table_view/shimmer_placeholder_shade.dart';
 import 'package:material_table_view/sliver_table_view.dart';
 import 'package:material_table_view/table_column_control_handles_popup_route.dart';
+import 'package:material_table_view/table_row_alternatives.dart';
 import 'package:material_table_view/table_view_typedefs.dart';
 import 'package:material_table_view_demo/global_target_platform.dart';
 import 'package:material_table_view_demo/stateful_random_background.dart';
@@ -100,7 +101,7 @@ class DemoPage extends StatefulWidget {
 }
 
 class _DemoPageState extends State<DemoPage>
-    with SingleTickerProviderStateMixin<DemoPage> {
+    with TickerProviderStateMixin<DemoPage> {
   late TabController tabController;
 
   final stylingController = DemoStylingController();
@@ -280,10 +281,6 @@ class _DemoPageState extends State<DemoPage>
           ),
         ),
         rowHeight: stylingController.doExpansion.value ? null : _rowHeight,
-        rowHeightBuilder: stylingController.doExpansion.value
-            ? (index, dimensions) =>
-                selection.contains(index) ? 2 * _rowHeight : _rowHeight
-            : null,
         // limit the row count when dynamic row height is used
         rowCount: stylingController.doExpansion.value
             ? (1 << 12) - 1
@@ -363,12 +360,6 @@ class _DemoPageState extends State<DemoPage>
                 rowCount: rowsPerTable,
                 rowHeight:
                     stylingController.doExpansion.value ? null : _rowHeight,
-                rowHeightBuilder: stylingController.doExpansion.value
-                    ? (index, dimensions) =>
-                        selection.contains(i * rowsPerTable + index)
-                            ? 2 * _rowHeight
-                            : _rowHeight
-                    : null,
                 rowBuilder: createRowBuilder(
                   context,
                   stylingController.doExpansion.value,
@@ -641,38 +632,43 @@ class _DemoPageState extends State<DemoPage>
       // this is going to be our content
       var content = contentBuilder(context, cellBuilder);
 
-      if (selected && doExpansion) {
-        // expand the row
-        content = Column(
-          children: [
-            Flexible(child: content),
-            Flexible(
-              child: contentBuilder(
-                context,
-                (context, column) {
-                  switch (columns[column].index) {
-                    case 0:
-                    case -1:
-                      return SizedBox();
-                    default:
-                      return Padding(
-                        padding: cellPadding,
-                        child: Align(
-                          alignment: cellAlignment,
-                          child: Text(
-                            '${sqrt((row + 2) * columns[column].index)}',
-                            style: textStyle,
-                            overflow: TextOverflow.fade,
-                            maxLines: 1,
-                            softWrap: false,
-                          ),
+      if (doExpansion) {
+        // build expandable row
+        content = ExpandableTableRow(
+          vsync: this,
+          duration: Duration(milliseconds: 200),
+          expanded: selected,
+          expandedChild: SizedBox(
+            height: _rowHeight,
+            child: contentBuilder(
+              context,
+              (context, column) {
+                switch (columns[column].index) {
+                  case 0:
+                  case -1:
+                    return SizedBox();
+                  default:
+                    return Padding(
+                      padding: cellPadding,
+                      child: Align(
+                        alignment: cellAlignment,
+                        child: Text(
+                          '${sqrt((row + 2) * columns[column].index)}',
+                          style: textStyle,
+                          overflow: TextOverflow.fade,
+                          maxLines: 1,
+                          softWrap: false,
                         ),
-                      );
-                  }
-                },
-              ),
-            )
-          ],
+                      ),
+                    );
+                }
+              },
+            ),
+          ),
+          child: SizedBox(
+            height: _rowHeight,
+            child: content,
+          ),
         );
       }
 
@@ -704,34 +700,38 @@ class _DemoPageState extends State<DemoPage>
   ) =>
       _wrapRow(
         row,
-        contentBuilder(
-          context,
-          (context, column) {
-            switch (columns[column].index) {
-              case 0:
-                return Checkbox(
-                  value: selection.contains(row),
-                  onChanged: _dummyCheckboxOnChanged,
-                );
-              case -1:
-                return ReorderableDragStartListener(
-                  index: row,
-                  child: const SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Icon(Icons.drag_indicator),
-                  ),
-                );
-              default:
-                return const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(16)))),
-                );
-            }
-          },
+        SizedBox(
+          height: stylingController.doExpansion.value ? _rowHeight : null,
+          child: contentBuilder(
+            context,
+            (context, column) {
+              switch (columns[column].index) {
+                case 0:
+                  return Checkbox(
+                    value: selection.contains(row),
+                    onChanged: _dummyCheckboxOnChanged,
+                  );
+                case -1:
+                  return ReorderableDragStartListener(
+                    index: row,
+                    child: const SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Icon(Icons.drag_indicator),
+                    ),
+                  );
+                default:
+                  return const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(16)))),
+                  );
+              }
+            },
+          ),
         ),
       );
 
